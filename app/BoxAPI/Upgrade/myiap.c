@@ -54,6 +54,8 @@
 #include "flash_if.h"
 #include "command.h"
 #include <string.h>
+
+#include "w25qxx.h" 
 pFunction   JumpToApplication;
 uint32_t    JumpAddress;
 
@@ -61,18 +63,14 @@ uint32_t    JumpAddress;
 uint32_t  volatile  MenuIndex = 0;
 uint32_t  volatile  FlashProtection = 0;
 /*****************************************************************************************/
-uint8_t  contactPack[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x00, 0xFF };
-uint8_t  contackAck[] = { 0x5A, 0XA5, 0x55, 0xAA, 0x00, 0xFF };
-uint8_t sendDatPackReq[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x01, 0xFE };
-uint8_t sendDatPackAck[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x02, 0xFD };
-uint8_t revDataOk[] = { 0xAA, 0X55, 0xA5, 0x5A, 0xA0, 0x5F };
+//uint8_t  contactPack[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x00, 0xFF };
+//uint8_t  contackAck[] = { 0x5A, 0XA5, 0x55, 0xAA, 0x00, 0xFF };
+//uint8_t sendDatPackReq[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x01, 0xFE };
+//uint8_t sendDatPackAck[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x02, 0xFD };
+//uint8_t revDataOk[] = { 0xAA, 0X55, 0xA5, 0x5A, 0xA0, 0x5F };
 
-#define recv_data_size   10368
-uint8_t     recv_data[recv_data_size];
-int    recv_datalen = 0;
-uint32_t  revPackNum = 0, revPacklenth;
-uint32_t  binDataLen = 0, binFileLen= 0;
-uint8_t stm32_version ;
+#define recv_data_size   1128
+
 
 /*****************************************************************************************/
 const char DownloadFile[] = "box.bin";
@@ -80,22 +78,20 @@ const char UploadFile[] = "F0upload.bin";
 /*****************************************************************************************/
 UINT fnum; /* 文件成功读写数量 */
 BYTE ReadBuffer[1024] = { 0 }; /* 读缓冲区 */
-BYTE WriteBuffer[] = "14424242424今天是个好日子，新建文件系统测试文件\n"; /* 写缓冲区*/  
+BYTE WriteBuffer[] = "今天是个好日子，新建文件系统测试文件\n"; /* 写缓冲区*/  
 
 uint8_t workBuffer[_MAX_SS];
 /*****************************************************************************************/
 void fatfstest(void)
 {
-	
-
-//	printf("》串行FLASH还没有文件系统，即将进行格式化...\n");
-//	//		/* 格式化 */
-//	retUSER = f_mkfs((TCHAR const*)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
-//			printf("retmkfs %s\r\n", FR_Table[retUSER]);
-//		retUSER = f_mount(NULL, (TCHAR const*)USERPath,0);	
-//		printf("retUSER %s\r\n", FR_Table[retUSER]);
-//		retUSER = f_mount(&USERFatFS, (TCHAR const*)USERPath, 0);
-//		printf("retUSER %s\r\n", FR_Table[retUSER]);
+	printf("》串行FLASH还没有文件系统，即将进行格式化...\n");
+	//		/* 格式化 */
+	retUSER = f_mkfs((TCHAR const*)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
+			printf("retmkfs %s\r\n", FR_Table[retUSER]);
+		retUSER = f_mount(NULL, (TCHAR const*)USERPath,0);	
+		printf("retUSER %s\r\n", FR_Table[retUSER]);
+		retUSER = f_mount(&USERFatFS, (TCHAR const*)USERPath, 0);
+		printf("retUSER %s\r\n", FR_Table[retUSER]);
 
 		printf("****** 即将进行文件写入测试... ******\n");	
 		retUSER = f_open(&USERFile, "1.txt", FA_CREATE_ALWAYS | FA_WRITE);
@@ -268,11 +264,13 @@ void RunApplication(void)
 }
 int socketConnect(int* n, char* addr, int port)
 {
-	int sockfd, error;
+	int sockfd, error=-1;
 	struct sockaddr_in servaddr;
 	socklen_t len;
 	struct hostent *host;
-    
+	
+	char str[INET_ADDRSTRLEN];
+	
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) return sockfd;
 
@@ -282,7 +280,8 @@ int socketConnect(int* n, char* addr, int port)
 		close(sockfd);
 		return -2;
 	}
-
+	printf("\address: %s\n",
+		inet_ntop(host->h_addrtype, host->h_addr, str, sizeof(str)));
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(port);
@@ -309,7 +308,18 @@ int socketConnect(int* n, char* addr, int port)
 }
 int8_t IAP_upgread(int socket)
 {
+	uint8_t contactPackReq[] = { 0x74, 0x68, 0x69, 0x73, 0x62, 0x33 };
+	uint8_t contactPackAck[] = { 0x74, 0x68, 0x69, 0x73, 0x73, 0x65, 0x76 };
+	uint8_t sendDatPackReq[] = { 0x72, 0x65, 0x71, 0x6d, 0x73, 0x67 };
+	uint8_t sendDatPackAck[] = { 0x72, 0x63, 0x76, 0x6d, 0x73, 0x67 };
+	uint8_t sendfilenum[4] = { 0 };
+	uint8_t revallfile[] = { 0x72, 0x63, 0x76, 0x61, 0x6c, 0x6c };
 
+	uint8_t     recv_data[recv_data_size];
+	int    recv_datalen = 0;
+	uint32_t  revPackNum = 0, revPacklenth;
+	uint32_t  binDataLen = 0, binFileLen = 0;
+	uint8_t stm32_version;
 	dog();
 	enum  File_Sta IAP_sta  = ServerIdle;
 	FILINFO finfno = { 0 };
@@ -318,10 +328,14 @@ int8_t IAP_upgread(int socket)
 		switch (IAP_sta)
 		{
 		case ServerIdle: //发送握手包
-			send(socket, contactPack, 6, 0);
+			send(socket, contactPackReq, 6, 0);
 //				send(socket, BUFF, 1, 0);
-			recv_datalen = recv(socket, recv_data, recv_data_size, 0);
-			if (memcmp(recv_data, contackAck, recv_datalen) == 0)
+			recv_datalen = UP_read(socket, recv_data, 7, 2000);
+			if (recv_datalen<=0)
+			{
+				return recv_datalen;
+			}
+			if (memcmp(recv_data, contactPackAck, recv_datalen) == 0)
 //			if(memcmp(recv_data, RBUFF, recv_datalen) == 0)
 			{
 				IAP_sta =clientCnn;
@@ -335,18 +349,22 @@ int8_t IAP_upgread(int socket)
 			IAP_sta = clientReq; 
 			break;
 		case clientReq: //获取bin文件信息
-			recv_datalen = recv(socket, recv_data, recv_data_size, 0);
+			recv_datalen = UP_read(socket, recv_data, 14, 2000);
+			if (recv_datalen <= 0)
+			{
+				return recv_datalen;
+			}
 				stm32_version = *(uint32_t*)(recv_data);
 				printf("stm32_version:%d\n", stm32_version);
 				binFileLen = *(uint32_t*)(recv_data + 10);
 				printf("binlen:%d\n", binFileLen);
 				recv_datalen = 0;
+			send(socket, sendDatPackAck, 6, 0);
 			//		retUSER = f_open(&USERFile, "1.txt", FA_CREATE_ALWAYS | FA_WRITE);
 //				retUSER = f_mkfs((TCHAR const*)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
 //			printf("retUSER %s\r\n", FR_Table[retUSER]);
 			dog();
 			taskENTER_CRITICAL();
-			
 			retUSER = f_open(&USERFile, DownloadFile, FA_CREATE_ALWAYS | FA_WRITE);
 				taskEXIT_CRITICAL();
 			printf("retopen %s\r\n", FR_Table[retUSER]);
@@ -358,77 +376,116 @@ int8_t IAP_upgread(int socket)
 					return -1;
 					//while (1) ;
 				}
-		
 				IAP_sta = senddatPak; 
 				revPackNum = 0;
 			break;
-		case senddatPak:
-			send(socket, sendDatPackAck, 6, 0);
+		case senddatPak://发送文件
+			printf("revPackNum:%d \n", revPackNum);
+		
+			sendfilenum[0] = (revPackNum >> 24) & 0x000000ff;
+			sendfilenum[1] = (revPackNum >> 16) & 0x000000ff;
+			sendfilenum[2] = (revPackNum >> 8) & 0x000000ff;
+			sendfilenum[3] = (revPackNum ) & 0x000000ff;
+			send(socket, sendfilenum, 4, 0);
 //			send(socket, "1", 1, 0);
 //			recv_datalen = 0;
 			dog();
-			recv_datalen = read(socket, recv_data, recv_data_size);
-			//校验数据包头
+			revPacklenth = binFileLen - binDataLen;
+			printf("recvlenth:%d", revPacklenth);
+			if (revPacklenth > 1024)
+			{
+				revPacklenth = 1034;
+			}
+			else
+			{
+				revPacklenth += 10;
+			}
+			memset(recv_data, 0, recv_data_size);
+			recv_datalen = UP_read(socket, recv_data, revPacklenth, 2000);
 			printf("recv_len:%d\n", recv_datalen);
+			if (recv_datalen <=0)
+			{
+				f_close(&USERFile);
+				//f_unlink(DownloadFile);
+				return recv_datalen;
+			}
+			//校验数据包头
+			
 			printf("recvpack:%d\n", *(uint32_t*)(recv_data));
 			if(recv_datalen)//接收到数据
 			{
-				if (*(uint32_t*)(recv_data) == revPackNum)
-				{
-					revPacklenth = *(uint32_t*)(recv_data + 4);
-					if (recv_datalen == (revPacklenth+10))
+//				if (recv_datalen == 1034)
+//				{ 
+					if (*(uint32_t*)(recv_data) == revPackNum)
 					{
-						binDataLen += *(uint32_t*)(recv_data + 4); 
-//						retUSER = FR_OK;
-//						fnum = 1034;
-//			
-					//	 taskENTER_CRITICAL();  //or portENTER_CRITICAL();
-						dog();
-						retUSER = f_write(&USERFile, recv_data + 10, recv_datalen - 10, &fnum);
-						f_sync(&USERFile);
-						f_lseek(&USERFile, binDataLen);
-						//taskEXIT_CRITICAL();   //or portEXIT_CRITICAL();
-					//	printf("retwrite %s\r\n", FR_Table[retUSER]);
-					}
-					if ((fnum == 0) || (retUSER != FR_OK))
-					{
-						/* 'STM32.TXT' file Write or EOF Error */
-						printf("writeerro\n");
-						return -1;
-					} 
-					//osDelay(100);
-					recv_datalen = 0;
-					revPackNum++;
-					if (binDataLen == binFileLen)
-					{
+						revPacklenth = *(uint32_t*)(recv_data + 4);
+						if (recv_datalen == (revPacklenth + 10))
+						{
+							binDataLen += *(uint32_t*)(recv_data + 4); 
+							dog();
+							taskENTER_CRITICAL();  //or portENTER_CRITICAL();
+							retUSER = f_write(&USERFile, recv_data + 10, recv_datalen - 10, &fnum);
+							taskEXIT_CRITICAL();    //or portEXIT_CRITICAL();
+							f_sync(&USERFile);
+							f_lseek(&USERFile, binDataLen);
+						}
+						if ((fnum == 0) || (retUSER != FR_OK))
+						{
+//							binDataLen -= *(uint32_t*)(recv_data + 4); 
+							/* 'STM32.TXT' file Write or EOF Error */
+													f_close(&USERFile);
+													
+							printf("writeerro\n");
+							//osDelay(3000);
 						
-						IAP_sta = sendAllOk; 
-						f_close(&USERFile);
-						printf("-->Receive  Bin Finish\n");
-					//	HAL_Delay(2000);
-						printf("-->Reboot  Device  for Updata Bin \n");
-					}
-					else
-					{
-						printf("Receive: %d%% Bin File\n", (binDataLen * 100 / binFileLen));
-						retUSER = -1;
-					}
-				}
-			}
+							//						IAP_sta  = ServerIdle;
+													return -1;
+						} 
+						else
+						{
+							recv_datalen = 0;
+							revPackNum++;	
+						}
 			
+						if (binDataLen == binFileLen)
+						{
+						
+							IAP_sta = sendAllOk; 
+							f_close(&USERFile);
+							printf("-->Receive  Bin Finish\n");
+							//	HAL_Delay(2000);
+								printf("-->Reboot  Device  for Updata Bin \n");
+						}
+						else
+						{
+							printf("binDataLen:%d \n", binDataLen);
+							printf("Receive: %d%% Bin File\n", (binDataLen * 100 / binFileLen));
+							retUSER = -1;
+						}
+					}
+//				}
+			}
 			break;
 		case sendAllOk:
-			send(socket, revDataOk, 6, 0);
+			send(socket, revallfile, 6, 0);
 			dog();
 			if (f_stat(DownloadFile, &finfno) != FR_OK) {
 				/* 'STM32.TXT' file Open for write Error */
 				//return DOWNLOAD_FILE_FAIL;
 			}
+			if ((finfno.fsize) != binFileLen)
+			{
+				//f_close(&USERFile);
+				f_unlink(DownloadFile);
+				return -1;
+			}
 			printf("feilsize:%d\n", finfno.fsize);
-			
 			IAP_sta = 6;
-			printf("数据接收完毕可以升级\n");
-		//	f_unlink(DownloadFile);
+			printf("数据接收完毕开始升级\n");
+			
+			__set_FAULTMASK(1);
+			HAL_NVIC_SystemReset();
+//			f_unlink(DownloadFile);
 			break;
 			//		case:
 			//			break;
@@ -461,3 +518,54 @@ void dog(void)
 {
 	HAL_GPIO_TogglePin(WDI_GPIO_Port, WDI_Pin);
 }
+int UP_read(int my_socket, unsigned char* buffer, int len, int timeout_ms)
+{
+	TickType_t xTicksToWait = timeout_ms / portTICK_PERIOD_MS; /* convert milliseconds to ticks */
+	TimeOut_t xTimeOut;
+	struct timeval interval = { timeout_ms / 1000, (timeout_ms % 1000) * 1000 };
+	if (interval.tv_sec < 0 || (interval.tv_sec == 0 && interval.tv_usec <= 0))
+	{
+		interval.tv_sec = 0;
+		interval.tv_usec = 1000;
+	}
+	
+	int recvLen = 0;
+	vTaskSetTimeOutState(&xTimeOut); /* Record the time at which this function was entered. */
+	do
+	{
+		int rc = 0;
+		setsockopt(my_socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&interval, sizeof(struct timeval));
+		rc = recv(my_socket, buffer + recvLen, len - recvLen, 0);
+		if (rc > 0)
+			recvLen += rc;
+		else if (rc < 0)
+		{
+			recvLen = rc;
+			break;
+		}
+	} while (recvLen < len && xTaskCheckForTimeOut(&xTimeOut,  &xTicksToWait) == pdFALSE);
+	return recvLen;
+}
+//int UP_read(int my_socket, unsigned char* buffer, int len, int timeout_ms)
+//{
+//	TickType_t xTicksToWait = timeout_ms / portTICK_PERIOD_MS; /* convert milliseconds to ticks */
+//	TimeOut_t xTimeOut;
+//	int recvLen = 0;
+//	vTaskSetTimeOutState(&xTimeOut); /* Record the time at which this function was entered. */
+//	do
+//	{
+//		int rc = 0;
+//		setsockopt(my_socket, 0, SO_RCVTIMEO, &xTicksToWait, sizeof(xTicksToWait));
+//		rc =recv(my_socket, buffer + recvLen, len - recvLen, 0);
+//		if (rc > 0)
+//			recvLen += rc;
+//		else if (rc < 0)
+//		{
+//			recvLen = rc;
+//			break;
+//		}
+//	} while (recvLen < len && xTaskCheckForTimeOut(&xTimeOut, &xTicksToWait) == pdFALSE);
+//	return recvLen;
+//}
+
+

@@ -99,7 +99,7 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	__set_PRIMASK(0);
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -129,9 +129,11 @@ int main(void)
   MX_SPI1_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-	HAL_Delay(100);
+//	HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+//	HAL_Delay(100);
 	HAL_GPIO_WritePin(ETH_RST_GPIO_Port, ETH_RST_Pin, GPIO_PIN_SET);
 	printf("begin\r\n");
+	W25QXX_Init();
 
   /* USER CODE END 2 */
 

@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+/app/App/.vs/App/v15
+/app/App/VisualGDB/Debug/CodeDB/App
+/app/App/App/VisualGDB
+/app/App/VisualGDB/Debug
+/Bootloder/Bootloder/Bootloder/VisualGDB/VisualGDBCache/Bootloder-Debug
+/Bootloder/Bootloder/Bootloder/VisualGDB/Debug
+/Bootloder/Bootloder/VisualGDB/Debug
+/Bootloder/Bootloder/.vs/Bootloder/v15

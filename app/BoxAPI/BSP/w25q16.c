@@ -71,9 +71,15 @@ uint8_t d_read,d_send;
 //函数功能: 从串行Flash读取一个字节数据
 uint8_t SPI_FLASH_ReadByte(void)
 {
-  if(HAL_SPI_TransmitReceive(&FLASH_SPI,&d_send,&d_read,1,0xFFFFFF)!=HAL_OK)
+
+	  if(HAL_SPI_TransmitReceive(&FLASH_SPI,&d_send,&d_read,1,0xffff)!=HAL_OK)
     d_read=0xff;
-  
+//  if(HAL_SPI_TransmitReceive_DMA(&FLASH_SPI,&d_send,&d_read,1)!=HAL_OK)
+//    d_read=0xff;
+//	while (HAL_SPI_GetState(&FLASH_SPI) != HAL_SPI_STATE_READY)
+//	{
+//	  
+//	} 
   return d_read;    
 }
  
@@ -81,9 +87,14 @@ uint8_t SPI_FLASH_ReadByte(void)
 // 函数功能: 往串行Flash读取写入一个字节数据并接收一个字节数据
 uint8_t SPI_FLASH_SendByte(uint8_t byte)
 {
-  if(HAL_SPI_TransmitReceive(&FLASH_SPI,&byte,&d_read,1,0xFFFFFF)!=HAL_OK)
+	
+	if (HAL_SPI_TransmitReceive(&FLASH_SPI, &byte, &d_read, 1, 0xffff) != HAL_OK)
    return 1;
-  
+//  if(HAL_SPI_TransmitReceive_DMA(&FLASH_SPI,&byte,&d_read,1)!=HAL_OK)
+//   return 1;
+//	while (HAL_SPI_GetState(&FLASH_SPI) != HAL_SPI_STATE_READY)
+//	{
+//	} 
    return 0; 
 }
  

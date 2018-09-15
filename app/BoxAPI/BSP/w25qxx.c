@@ -319,7 +319,7 @@ void W25QXX_Write(uint8_t* pBuffer,uint32_t WriteAddr,uint16_t NumByteToWrite)
 //等待时间超长...
 void W25QXX_Erase_Chip(void)   
 {    
-		uint8_t data[1]={W25X_ChipErase}; 	
+	uint8_t data[1]={W25X_ChipErase}; 	
     W25QXX_Write_Enable();                  //SET WEL 
     W25QXX_Wait_Busy();   
   	W25QXX_CS_L;                            //使能器件   
@@ -366,8 +366,11 @@ void W25QXX_Erase_Sector(uint32_t Dst_Addr)
 }  
 //等待空闲
 void W25QXX_Wait_Busy(void)   
-{   
-	while((W25QXX_ReadSR()&0x01)==0x01);   // 等待BUSY位清空
+{ 
+	while ((W25QXX_ReadSR() & 0x01) == 0x01)
+	{
+	
+	}  // 等待BUSY位清空
 }  
 //进入掉电模式
 void W25QXX_PowerDown(void)   

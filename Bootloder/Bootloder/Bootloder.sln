@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2003
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bootloder", "Bootloder\Bootloder.vcxproj", "{3185C84C-B94A-4449-AD8F-6D43DB38179E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|VisualGDB = Debug|VisualGDB
+		Release|VisualGDB = Release|VisualGDB
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3185C84C-B94A-4449-AD8F-6D43DB38179E}.Debug|VisualGDB.ActiveCfg = Debug|VisualGDB
+		{3185C84C-B94A-4449-AD8F-6D43DB38179E}.Debug|VisualGDB.Build.0 = Debug|VisualGDB
+		{3185C84C-B94A-4449-AD8F-6D43DB38179E}.Release|VisualGDB.ActiveCfg = Release|VisualGDB
+		{3185C84C-B94A-4449-AD8F-6D43DB38179E}.Release|VisualGDB.Build.0 = Release|VisualGDB
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B78E95EF-8106-40CF-89FA-2D6556545990}
+	EndGlobalSection
+EndGlobal

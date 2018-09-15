@@ -353,13 +353,15 @@ void decoding(uint8_t * data, uint8_t * error, uint8_t *lenth)
 		case 0x28:
 			UpdateDateTime(&time);
 			data[4] = 0;
-			data[5] = 0x01;	
+			data[5] = 0x01;
+			data[6] = 0;
 			data[7] = time.hour;
 			break;
 		case 0x29:
 			UpdateDateTime(&time);
 			data[4] = 0;
 			data[5] = 0x01;	
+			data[6] = 0;
 			data[7] = time.minute;
 			
 			break;
@@ -367,6 +369,7 @@ void decoding(uint8_t * data, uint8_t * error, uint8_t *lenth)
 			UpdateDateTime(&time);
 			data[4] = 0;
 			data[5] = 0x01;	
+			data[6] = 0;
 			data[7] = time.second;
 			
 			break;
@@ -374,6 +377,7 @@ void decoding(uint8_t * data, uint8_t * error, uint8_t *lenth)
 			UpdateDateTime(&time);
 			data[4] = 0;
 			data[5] = 0x01;	
+			data[6] = 0;
 			data[7] = time.year;
 			
 			break;
@@ -381,6 +385,7 @@ void decoding(uint8_t * data, uint8_t * error, uint8_t *lenth)
 			UpdateDateTime(&time);
 			data[4] = 0;
 			data[5] = 0x01;	
+			data[6] = 0;
 			data[7] = time.month;
 			
 			break;
@@ -388,13 +393,15 @@ void decoding(uint8_t * data, uint8_t * error, uint8_t *lenth)
 			UpdateDateTime(&time);
 			data[4] = 0;
 			data[5] = 0x01;	
+			data[6] = 0;
 			data[7] = time.day;
 			
 			break;
 		case 0x2F:
 			UpdateDateTime(&time);
 			data[4] = 0;
-			data[5] = 0x01;	
+			data[5] = 0x01;
+			data[6] = 0;
 			data[7] = time.week;
 			
 			break;

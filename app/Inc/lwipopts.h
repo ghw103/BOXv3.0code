@@ -162,8 +162,8 @@
 	 //#define UDP_DEBUG LWIP_DBG_ON
 
 	 /*---------------------------------×èÈû³¬Ê±--------------------------------------------*/	
-	 //#define	 LWIP_SO_RCVTIMEO 1
-	 
+	 #define	 LWIP_SO_RCVTIMEO 1
+
 	 	 //#define SYS_LIGHTWEIGHT_PROT    1
 	 
 	 	 /*---------------------------------tcpkeeplive--------------------------------------------*/	 

@@ -91,4 +91,6 @@ typedef  void (*pFunction)(void);
 	 void RunApplication(void);
 	 int8_t IAP_upgread(int socket);
 	 void dog(void);
+	 int UP_read(int my_socket, unsigned char* buffer, int len, int timeout_ms);
+	 
 #endif

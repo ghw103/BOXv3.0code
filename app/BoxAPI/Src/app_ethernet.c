@@ -170,7 +170,12 @@ void User_notification(struct netif *netif)
 		#ifdef USE_LCD
 			uint8_t iptxt[20];
 			sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
-			printf ("Static IP address: %s\n", iptxt);
+		 printf("Static IP address: %s\n", iptxt);
+		 sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->netmask));
+			printf ("Static net address: %s\n", iptxt);
+		 sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->gw));
+		 printf("Static net address: %s\n", iptxt);
+		
 		#else    
 			/* Turn On LED 1 to indicate ETH and LwIP init success*/
 			BSP_LED_On(LED1);
@@ -270,10 +275,17 @@ void ethernetif_notify_conn_changed(struct netif *netif)
 #endif /* USE_LCD */    
   }
 }
-int net_get_mac_address(struct netif *netif,net_macaddr_t* macAddress)
+int net_get_ipaddress(struct netif *netif, uint8_t* ipAddress)
 {
-	
-	memcpy(macAddress->mac, netif->hwaddr, netif->hwaddr_len);
+	memcpy(ipAddress, (const ip4_addr_t *)&netif->ip_addr, 4);
+	memcpy(ipAddress+4, (const ip4_addr_t *)&netif->netmask, 4);
+	memcpy(ipAddress+8, (const ip4_addr_t *)&netif->gw, 4);
+	return 0;
+}
+
+int net_get_mac_address(struct netif *netif,uint8_t* macAddress)
+{
+	memcpy(macAddress, netif->hwaddr, netif->hwaddr_len);
 	return 0;
 }
 #if defined(USE_DHCP)

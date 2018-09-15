@@ -1426,4 +1426,9 @@
       <Filter>Source files\STM32Cube HAL\FREERTOS</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <LinkerScript Include="STM32F407VE_flash.lds">
+      <Filter>Source files</Filter>
+    </LinkerScript>
+  </ItemGroup>
 </Project>

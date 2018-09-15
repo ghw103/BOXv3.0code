@@ -84,7 +84,9 @@ extern uint8_t dhcp_flage;
 /* Exported functions ------------------------------------------------------- */
 void User_notification(struct netif *netif);
 void Netif_Config(void);
-	 int net_get_mac_address(struct netif *netif, net_macaddr_t* macAddress);	
+	 int net_get_mac_address(struct netif *netif, uint8_t* macAddress);	
+	 int net_get_ipaddress(struct netif *netif, uint8_t* ipAddress);
+	 
 #ifdef USE_DHCP
 void DHCP_thread(void const * argument);
 #endif 

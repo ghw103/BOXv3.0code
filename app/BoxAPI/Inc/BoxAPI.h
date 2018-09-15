@@ -34,20 +34,28 @@
   */
   
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __API_H
-#define __API_H
+#ifndef __BOXAPI_H
+#define __BOXAPI_H
+
 #include "stm32f4xx_hal.h"
+
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-#define  ipstastuslen  66
-#define  ipsetstastuslen  90
-#define  mqttstatus      133	 
-#define  username      32		 
+#define  ipstastuslen  68
+#define  ipsetstastuslen  92
+#define  mqttstatus      135	 
+#define  username      34		
 	 
+#define  ipaddrflash 32	 
+#define  ipaddrflash 32	 
+#define  returnid  201	 	 
+
+	 uint32_t user_CRC(uint8_t *pBuff, uint32_t len);
+	
 	 
-	 
+	 void  restory();
 void SetMac(void);
 	 void loaduppar(char * ipaddr, uint16_t *port);
 	 void loadipar(uint8_t * ipaddr, uint8_t * NETMASK, uint8_t * gatway);
@@ -61,4 +69,4 @@ void SetMac(void);
 	 void loadtime(uint8_t * parameter);
 	 void saveparmqttbuf(uint8_t * parameter);
 
-#endif /* __API_H */
+#endif /* __BOXAPI_H */
