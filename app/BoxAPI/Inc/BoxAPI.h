@@ -32,7 +32,7 @@
   *
   ******************************************************************************
   */
-  
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __BOXAPI_H
 #define __BOXAPI_H
@@ -40,33 +40,33 @@
 #include "stm32f4xx_hal.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
 
-#define  ipstastuslen  68
-#define  ipsetstastuslen  92
-#define  mqttstatus      135	 
-#define  username      34		
-	 
-#define  ipaddrflash 32	 
-#define  ipaddrflash 32	 
-#define  returnid  201	 	 
+#define ipstastuslen 68
+#define ipsetstastuslen 92
+#define setmqttbufflen 135
+#define setusername 34
 
-	 uint32_t user_CRC(uint8_t *pBuff, uint32_t len);
-	
-	 
-	 void  restory();
-void SetMac(void);
-	 void loaduppar(char * ipaddr, uint16_t *port);
-	 void loadipar(uint8_t * ipaddr, uint8_t * NETMASK, uint8_t * gatway);
-	 void loadMQTTpar(char * ipaddr, uint16_t *port);
-	 void loadDHCPset(uint8_t * DHCP);
-	 void loadpar(uint8_t * parameter);
-	 void savepar(uint8_t * parameter);
-	 void loadparmqttbuf(uint8_t * parameter);
-	 void saveuser(uint8_t * parameter);
-	 void loaduser(uint8_t * parameter);
-	 void loadtime(uint8_t * parameter);
-	 void saveparmqttbuf(uint8_t * parameter);
+#define ipaddrflash 32
+#define ipaddrflash 32
+#define returnid 201
+  extern uint8_t mqttstatus;
+  uint32_t user_CRC(uint8_t *pBuff, uint32_t len);
+
+  void restory();
+  void SetMac(void);
+  void loaduppar(char *ipaddr, uint16_t *port);
+  void loadipar(uint8_t *ipaddr, uint8_t *NETMASK, uint8_t *gatway);
+  void loadMQTTpar(uint8_t *mqttlock, char *ipaddr, uint16_t *port);
+  void loadDHCPset(uint8_t *DHCP);
+  void loadpar(uint8_t *parameter);
+  void savepar(uint8_t *parameter);
+  void loadparmqttbuf(uint8_t *parameter);
+  void saveuser(uint8_t *parameter);
+  void loaduser(uint8_t *parameter);
+  void loadtime(uint8_t *parameter);
+  void saveparmqttbuf(uint8_t *parameter);
 
 #endif /* __BOXAPI_H */

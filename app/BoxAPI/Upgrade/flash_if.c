@@ -41,7 +41,7 @@
   * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */ 
+  */
 
 /** @addtogroup STM32F4xx_IAP_Main
   * @{
@@ -65,11 +65,11 @@ static uint32_t GetSector(uint32_t Address);
   * @retval None
   */
 void FLASH_If_Init(void)
-{ 
-  HAL_FLASH_Unlock(); 
+{
+  HAL_FLASH_Unlock();
 
-  /* Clear pending flags (if any) */  
-  __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | 
+  /* Clear pending flags (if any) */
+  __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR |
                          FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR);
 }
 
@@ -85,23 +85,23 @@ uint32_t FLASH_If_Erase(uint32_t StartSector)
   uint32_t SectorError;
   FLASH_EraseInitTypeDef pEraseInit;
 
-  /* Unlock the Flash to enable the flash control register access *************/ 
+  /* Unlock the Flash to enable the flash control register access *************/
   FLASH_If_Init();
-  
+
   /* Get the sector where start the user flash area */
   UserStartSector = GetSector(APPLICATION_ADDRESS);
-  
+
   pEraseInit.TypeErase = TYPEERASE_SECTORS;
   pEraseInit.Sector = UserStartSector;
   pEraseInit.NbSectors = 10;
   pEraseInit.VoltageRange = VOLTAGE_RANGE_3;
-    
+
   if (HAL_FLASHEx_Erase(&pEraseInit, &SectorError) != HAL_OK)
   {
-     /* Error occurred while page erase */
-     return (1);
+    /* Error occurred while page erase */
+    return (1);
   }
-  
+
   return (0);
 }
 
@@ -115,21 +115,21 @@ uint32_t FLASH_If_Erase(uint32_t StartSector)
   *         1: Error occurred while writing data in Flash memory
   *         2: Written Data in flash memory is different from expected one
   */
-uint32_t FLASH_If_Write(uint32_t FlashAddress, uint32_t* Data ,uint32_t DataLength)
+uint32_t FLASH_If_Write(uint32_t FlashAddress, uint32_t *Data, uint32_t DataLength)
 {
   uint32_t i = 0;
 
-  for (i = 0; (i < DataLength) && (FlashAddress <= (USER_FLASH_END_ADDRESS-4)); i++)
+  for (i = 0; (i < DataLength) && (FlashAddress <= (USER_FLASH_END_ADDRESS - 4)); i++)
   {
     /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
-       be done by word */ 
-    if (HAL_FLASH_Program(TYPEPROGRAM_WORD, FlashAddress, *(uint32_t*)(Data+i)) == HAL_OK)      
+       be done by word */
+    if (HAL_FLASH_Program(TYPEPROGRAM_WORD, FlashAddress, *(uint32_t *)(Data + i)) == HAL_OK)
     {
-     /* Check the written value */
-      if (*(uint32_t*)FlashAddress != *(uint32_t*)(Data+i))
+      /* Check the written value */
+      if (*(uint32_t *)FlashAddress != *(uint32_t *)(Data + i))
       {
         /* Flash content doesn't match SRAM content */
-        return(FLASHIF_WRITINGCTRL_ERROR);
+        return (FLASHIF_WRITINGCTRL_ERROR);
       }
       /* Increment FLASH destination address */
       FlashAddress += 4;
@@ -169,13 +169,13 @@ uint16_t FLASH_If_GetWriteProtectionStatus(void)
   ProtectedSECTOR = ~(OptionsBytesStruct.WRPSector) & FLASH_SECTOR_TO_BE_PROTECTED;
 
   /* Check if desired pages are already write protected ***********************/
-  if(ProtectedSECTOR != 0)
+  if (ProtectedSECTOR != 0)
   {
     /* Some sectors inside the user flash area are write protected */
     return FLASHIF_PROTECTION_WRPENABLED;
   }
   else
-  { 
+  {
     /* No write protected sectors inside the user flash area */
     return FLASHIF_PROTECTION_NONE;
   }
@@ -189,54 +189,54 @@ uint16_t FLASH_If_GetWriteProtectionStatus(void)
 static uint32_t GetSector(uint32_t Address)
 {
   uint32_t sector = 0;
-  
-  if((Address < ADDR_FLASH_SECTOR_1) && (Address >= ADDR_FLASH_SECTOR_0))
+
+  if ((Address < ADDR_FLASH_SECTOR_1) && (Address >= ADDR_FLASH_SECTOR_0))
   {
-    sector = FLASH_SECTOR_0;  
+    sector = FLASH_SECTOR_0;
   }
-  else if((Address < ADDR_FLASH_SECTOR_2) && (Address >= ADDR_FLASH_SECTOR_1))
+  else if ((Address < ADDR_FLASH_SECTOR_2) && (Address >= ADDR_FLASH_SECTOR_1))
   {
-    sector = FLASH_SECTOR_1;  
+    sector = FLASH_SECTOR_1;
   }
-  else if((Address < ADDR_FLASH_SECTOR_3) && (Address >= ADDR_FLASH_SECTOR_2))
+  else if ((Address < ADDR_FLASH_SECTOR_3) && (Address >= ADDR_FLASH_SECTOR_2))
   {
-    sector = FLASH_SECTOR_2;  
+    sector = FLASH_SECTOR_2;
   }
-  else if((Address < ADDR_FLASH_SECTOR_4) && (Address >= ADDR_FLASH_SECTOR_3))
+  else if ((Address < ADDR_FLASH_SECTOR_4) && (Address >= ADDR_FLASH_SECTOR_3))
   {
-    sector = FLASH_SECTOR_3;  
+    sector = FLASH_SECTOR_3;
   }
-  else if((Address < ADDR_FLASH_SECTOR_5) && (Address >= ADDR_FLASH_SECTOR_4))
+  else if ((Address < ADDR_FLASH_SECTOR_5) && (Address >= ADDR_FLASH_SECTOR_4))
   {
-    sector = FLASH_SECTOR_4;  
+    sector = FLASH_SECTOR_4;
   }
-  else if((Address < ADDR_FLASH_SECTOR_6) && (Address >= ADDR_FLASH_SECTOR_5))
+  else if ((Address < ADDR_FLASH_SECTOR_6) && (Address >= ADDR_FLASH_SECTOR_5))
   {
-    sector = FLASH_SECTOR_5;  
+    sector = FLASH_SECTOR_5;
   }
-  else if((Address < ADDR_FLASH_SECTOR_7) && (Address >= ADDR_FLASH_SECTOR_6))
+  else if ((Address < ADDR_FLASH_SECTOR_7) && (Address >= ADDR_FLASH_SECTOR_6))
   {
-    sector = FLASH_SECTOR_6;  
+    sector = FLASH_SECTOR_6;
   }
-  else if((Address < ADDR_FLASH_SECTOR_8) && (Address >= ADDR_FLASH_SECTOR_7))
+  else if ((Address < ADDR_FLASH_SECTOR_8) && (Address >= ADDR_FLASH_SECTOR_7))
   {
-    sector = FLASH_SECTOR_7;  
+    sector = FLASH_SECTOR_7;
   }
-  else if((Address < ADDR_FLASH_SECTOR_9) && (Address >= ADDR_FLASH_SECTOR_8))
+  else if ((Address < ADDR_FLASH_SECTOR_9) && (Address >= ADDR_FLASH_SECTOR_8))
   {
-    sector = FLASH_SECTOR_8;  
+    sector = FLASH_SECTOR_8;
   }
-  else if((Address < ADDR_FLASH_SECTOR_10) && (Address >= ADDR_FLASH_SECTOR_9))
+  else if ((Address < ADDR_FLASH_SECTOR_10) && (Address >= ADDR_FLASH_SECTOR_9))
   {
-    sector = FLASH_SECTOR_9;  
+    sector = FLASH_SECTOR_9;
   }
-  else if((Address < ADDR_FLASH_SECTOR_11) && (Address >= ADDR_FLASH_SECTOR_10))
+  else if ((Address < ADDR_FLASH_SECTOR_11) && (Address >= ADDR_FLASH_SECTOR_10))
   {
-    sector = FLASH_SECTOR_10;  
+    sector = FLASH_SECTOR_10;
   }
   else /*(Address < FLASH_END_ADDR) && (Address >= ADDR_FLASH_SECTOR_11))*/
   {
-    sector = FLASH_SECTOR_11;  
+    sector = FLASH_SECTOR_11;
   }
   return sector;
 }
@@ -251,7 +251,7 @@ HAL_StatusTypeDef FLASH_If_WriteProtectionConfig(uint32_t modifier)
   uint32_t ProtectedSECTOR = 0xFFF;
   FLASH_OBProgramInitTypeDef config_new, config_old;
   HAL_StatusTypeDef result = HAL_OK;
-  
+
   /* Get pages write protection status ****************************************/
   HAL_FLASHEx_OBGetConfig(&config_old);
 
@@ -260,22 +260,22 @@ HAL_StatusTypeDef FLASH_If_WriteProtectionConfig(uint32_t modifier)
 
   /* We want to modify only the Write protection */
   config_new.OptionType = OPTIONBYTE_WRP;
-  
+
   /* No read protection, keep BOR and reset settings */
   config_new.RDPLevel = OB_RDP_LEVEL_0;
-  config_new.USERConfig = config_old.USERConfig;  
+  config_new.USERConfig = config_old.USERConfig;
   /* Get pages already write protected ****************************************/
   ProtectedSECTOR = config_old.WRPSector | FLASH_SECTOR_TO_BE_PROTECTED;
 
-  /* Unlock the Flash to enable the flash control register access *************/ 
+  /* Unlock the Flash to enable the flash control register access *************/
   HAL_FLASH_Unlock();
 
   /* Unlock the Options Bytes *************************************************/
   HAL_FLASH_OB_Unlock();
-  
-  config_new.WRPSector    = ProtectedSECTOR;
+
+  config_new.WRPSector = ProtectedSECTOR;
   result = HAL_FLASHEx_OBProgram(&config_new);
-  
+
   return result;
 }
 

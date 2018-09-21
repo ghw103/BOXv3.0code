@@ -46,7 +46,7 @@
   *
   ******************************************************************************
   */
- 
+
 /* Includes ------------------------------------------------------------------*/
 #include "myiap.h"
 #include "w25q16.h"
@@ -55,13 +55,13 @@
 #include "command.h"
 #include <string.h>
 
-#include "w25qxx.h" 
-pFunction   JumpToApplication;
-uint32_t    JumpAddress;
+#include "w25qxx.h"
+pFunction JumpToApplication;
+uint32_t JumpAddress;
 
 /*****************************************************************************************/
-uint32_t  volatile  MenuIndex = 0;
-uint32_t  volatile  FlashProtection = 0;
+uint32_t volatile MenuIndex = 0;
+uint32_t volatile FlashProtection = 0;
 /*****************************************************************************************/
 //uint8_t  contactPack[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x00, 0xFF };
 //uint8_t  contackAck[] = { 0x5A, 0XA5, 0x55, 0xAA, 0x00, 0xFF };
@@ -69,52 +69,52 @@ uint32_t  volatile  FlashProtection = 0;
 //uint8_t sendDatPackAck[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x02, 0xFD };
 //uint8_t revDataOk[] = { 0xAA, 0X55, 0xA5, 0x5A, 0xA0, 0x5F };
 
-#define recv_data_size   1128
-
+#define recv_data_size 1128
 
 /*****************************************************************************************/
 const char DownloadFile[] = "box.bin";
 const char UploadFile[] = "F0upload.bin";
 /*****************************************************************************************/
-UINT fnum; /* ÎÄ¼ş³É¹¦¶ÁĞ´ÊıÁ¿ */
-BYTE ReadBuffer[1024] = { 0 }; /* ¶Á»º³åÇø */
-BYTE WriteBuffer[] = "½ñÌìÊÇ¸öºÃÈÕ×Ó£¬ĞÂ½¨ÎÄ¼şÏµÍ³²âÊÔÎÄ¼ş\n"; /* Ğ´»º³åÇø*/  
 
-uint8_t workBuffer[_MAX_SS];
 /*****************************************************************************************/
 void fatfstest(void)
 {
-	printf("¡·´®ĞĞFLASH»¹Ã»ÓĞÎÄ¼şÏµÍ³£¬¼´½«½øĞĞ¸ñÊ½»¯...\n");
-	//		/* ¸ñÊ½»¯ */
-	retUSER = f_mkfs((TCHAR const*)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
-			printf("retmkfs %s\r\n", FR_Table[retUSER]);
-		retUSER = f_mount(NULL, (TCHAR const*)USERPath,0);	
-		printf("retUSER %s\r\n", FR_Table[retUSER]);
-		retUSER = f_mount(&USERFatFS, (TCHAR const*)USERPath, 0);
-		printf("retUSER %s\r\n", FR_Table[retUSER]);
+	UINT fnum; /* æ–‡ä»¶æˆåŠŸè¯»å†™æ•°é‡ */
+	BYTE ReadBuffer[1024] = { 0 }; /* è¯»ç¼“å†²åŒº */
+	BYTE WriteBuffer[] = "ä»Šå¤©æ˜¯ä¸ªå¥½æ—¥å­ï¼Œæ–°å»ºæ–‡ä»¶ç³»ç»Ÿæµ‹è¯•æ–‡ä»¶\n"; /* å†™ç¼“å†²åŒº*/
 
-		printf("****** ¼´½«½øĞĞÎÄ¼şĞ´Èë²âÊÔ... ******\n");	
-		retUSER = f_open(&USERFile, "1.txt", FA_CREATE_ALWAYS | FA_WRITE);
-		printf("retUSER %s\r\n", FR_Table[retUSER]);
-		retUSER = f_write(&USERFile, WriteBuffer, sizeof(WriteBuffer), &fnum);
-		printf("retUSER %s\r\n", FR_Table[retUSER]);
-		f_close(&USERFile);
-		printf("****** ¼´½«½øĞĞÎÄ¼ş¶ÁÈ¡²âÊÔ... ******\n");
-	taskENTER_CRITICAL(); 
-	retUSER = f_open(&USERFile, "1.txt", FA_OPEN_EXISTING | FA_READ); 	
-	taskEXIT_CRITICAL(); 
+	uint8_t workBuffer[_MAX_SS];
+	printf("ã€‹ä¸²è¡ŒFLASHè¿˜æ²¡æœ‰æ–‡ä»¶ç³»ç»Ÿï¼Œå³å°†è¿›è¡Œæ ¼å¼åŒ–...\n");
+	//		/* æ ¼å¼åŒ– */
+	retUSER = f_mkfs((TCHAR const *)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
+	printf("retmkfs %s\r\n", FR_Table[retUSER]);
+	retUSER = f_mount(NULL, (TCHAR const *)USERPath, 0);
 	printf("retUSER %s\r\n", FR_Table[retUSER]);
-	
-		retUSER = f_read(&USERFile, ReadBuffer, sizeof(ReadBuffer), &fnum); 
+	retUSER = f_mount(&USERFatFS, (TCHAR const *)USERPath, 0);
 	printf("retUSER %s\r\n", FR_Table[retUSER]);
-	printf("¡·ÎÄ¼ş¶ÁÈ¡³É¹¦,¶Áµ½×Ö½ÚÊı¾İ£º%d\n", fnum);
-	printf("¡·¶ÁÈ¡µÃµÄÎÄ¼şÊı¾İÎª£º\n%s \n", ReadBuffer);	
+
+	printf("****** å³å°†è¿›è¡Œæ–‡ä»¶å†™å…¥æµ‹è¯•... ******\n");
+	retUSER = f_open(&USERFile, "1.txt", FA_CREATE_ALWAYS | FA_WRITE);
+	printf("retUSER %s\r\n", FR_Table[retUSER]);
+	retUSER = f_write(&USERFile, WriteBuffer, sizeof(WriteBuffer), &fnum);
+	printf("retUSER %s\r\n", FR_Table[retUSER]);
+	f_close(&USERFile);
+	printf("****** å³å°†è¿›è¡Œæ–‡ä»¶è¯»å–æµ‹è¯•... ******\n");
+	taskENTER_CRITICAL();
+	retUSER = f_open(&USERFile, "1.txt", FA_OPEN_EXISTING | FA_READ);
+	taskEXIT_CRITICAL();
+	printf("retUSER %s\r\n", FR_Table[retUSER]);
+
+	retUSER = f_read(&USERFile, ReadBuffer, sizeof(ReadBuffer), &fnum);
+	printf("retUSER %s\r\n", FR_Table[retUSER]);
+	printf("ã€‹æ–‡ä»¶è¯»å–æˆåŠŸ,è¯»åˆ°å­—èŠ‚æ•°æ®ï¼š%d\n", fnum);
+	printf("ã€‹è¯»å–å¾—çš„æ–‡ä»¶æ•°æ®ä¸ºï¼š\n%s \n", ReadBuffer);
 	f_close(&USERFile);
 }
 
 void main_iap(void)
 {
-	
+
 	switch (MenuIndex)
 	{
 		/* From card to FLASH */
@@ -138,9 +138,9 @@ void main_iap(void)
 		break;
 		/* From FLASH to card */
 	case 1:
-            
+
 		if ((FlashProtection & FLASHIF_PROTECTION_RDPENABLED) == 0)
-		{  
+		{
 			/* Remove UPLOAD file if exists on flash disk */
 			f_unlink(UploadFile);
 			/* Open new file to be wrriten with flash data */
@@ -188,7 +188,7 @@ void main_iap(void)
 			{
 				printf(" Write Protection disabled  \n ");
 				printf(" Press tamper button  \n ");
-				printf(" System will now restart   \n ");             
+				printf(" System will now restart   \n ");
 				/* Launch the option byte loading */
 				HAL_FLASH_OB_Launch();
 			}
@@ -196,7 +196,6 @@ void main_iap(void)
 			{
 				printf(" Error: Flash write    \n ");
 				printf("  un-protection failed      \n ");
-
 			}
 		}
 		else
@@ -206,7 +205,6 @@ void main_iap(void)
 				printf(" Write Protection enable  \n ");
 				printf(" Press tamper button  \n ");
 				printf(" System will now restart   \n ");
-
 				/* Launch the option byte loading */
 				HAL_FLASH_OB_Launch();
 			}
@@ -217,7 +215,6 @@ void main_iap(void)
 			}
 		}
 		break;
-
 	default:
 		/* Clear the LCD */
 		printf(" Selection Error      \n ");
@@ -232,66 +229,58 @@ void main_iap(void)
 void RunApplication(void)
 {
 	/* Test if user code is programmed starting from address "APPLICATION_ADDRESS" */
-	if (((*(__IO uint32_t*)APPLICATION_ADDRESS) & 0x2FFE0000) == 0x20000000)
+	if (((*(__IO uint32_t *)APPLICATION_ADDRESS) & 0x2FFE0000) == 0x20000000)
 	{
-		/* Clear the LCD */
-//		BSP_LCD_Clear(LCD_COLOR_WHITE);
-//		/*  Error message */
-//		BSP_LCD_DisplayStringAtLine(1, (uint8_t*)" The user application");
-//		BSP_LCD_DisplayStringAtLine(2, (uint8_t*)" running ");
-
 		/* Jump to user application */
-		JumpAddress = *(__IO uint32_t*)(APPLICATION_ADDRESS + 4);
-		JumpToApplication = (pFunction) JumpAddress;
+		JumpAddress = *(__IO uint32_t *)(APPLICATION_ADDRESS + 4);
+		JumpToApplication = (pFunction)JumpAddress;
 		/* Initialize user application's Stack Pointer */
-#if   (defined ( __GNUC__ ))
-		    /* Compensation as the Stack Pointer is placed at the very end of RAM */
-		__set_MSP((*(__IO uint32_t*) APPLICATION_ADDRESS) - 64);
+#if (defined(__GNUC__))
+		/* Compensation as the Stack Pointer is placed at the very end of RAM */
+		__set_MSP((*(__IO uint32_t *)APPLICATION_ADDRESS) - 64);
 #else  /* (defined  (__GNUC__ )) */
-		__set_MSP(*(__IO uint32_t*) APPLICATION_ADDRESS);
+		__set_MSP(*(__IO uint32_t *)APPLICATION_ADDRESS);
 #endif /* (defined  (__GNUC__ )) */
-
 		JumpToApplication();
 	}
 	else
 	{
 		/* Clear the LCD */
-//		BSP_LCD_Clear(LCD_COLOR_WHITE);
-//		/*  Error message */
-//		BSP_LCD_DisplayStringAtLine(1, (uint8_t*)" The user application");
-//		BSP_LCD_DisplayStringAtLine(2, (uint8_t*)" isn't loaded properly ");
+		//		BSP_LCD_Clear(LCD_COLOR_WHITE);
+		//		/*  Error message */
+		//		BSP_LCD_DisplayStringAtLine(1, (uint8_t*)" The user application");
+		//		BSP_LCD_DisplayStringAtLine(2, (uint8_t*)" isn't loaded properly ");
 	}
 }
-int socketConnect(int* n, char* addr, int port)
+int socketConnect(int *n, char *addr, int port)
 {
-	int sockfd, error=-1;
+	int sockfd, error = -1;
 	struct sockaddr_in servaddr;
 	socklen_t len;
 	struct hostent *host;
-	
+
 	char str[INET_ADDRSTRLEN];
-	
+
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < 0) return sockfd;
+	if (sockfd < 0)
+		return sockfd;
 
 	host = gethostbyname(addr);
-	if (NULL == host || host->h_addrtype != AF_INET) 
+	if (NULL == host || host->h_addrtype != AF_INET)
 	{
 		close(sockfd);
 		return -2;
 	}
 	printf("\address: %s\n",
-		inet_ntop(host->h_addrtype, host->h_addr, str, sizeof(str)));
+	inet_ntop(host->h_addrtype, host->h_addr, str, sizeof(str)));
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(port);
 	memcpy(&servaddr.sin_addr, host->h_addr, sizeof(struct in_addr));
 	//inet_aton(srv, &(servaddr.sin_addr));
-//inet_pton(AF_INET, srv, &servaddr.sin_addr);
-
+	//inet_pton(AF_INET, srv, &servaddr.sin_addr);
 	// TODO: Use SetSockOpt to
 	error = connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
-
 	if (error == 0)
 	{
 		error = getsockname(sockfd, (struct sockaddr *)&servaddr, &len);
@@ -308,87 +297,88 @@ int socketConnect(int* n, char* addr, int port)
 }
 int8_t IAP_upgread(int socket)
 {
-	uint8_t contactPackReq[] = { 0x74, 0x68, 0x69, 0x73, 0x62, 0x33 };
-	uint8_t contactPackAck[] = { 0x74, 0x68, 0x69, 0x73, 0x73, 0x65, 0x76 };
-	uint8_t sendDatPackReq[] = { 0x72, 0x65, 0x71, 0x6d, 0x73, 0x67 };
-	uint8_t sendDatPackAck[] = { 0x72, 0x63, 0x76, 0x6d, 0x73, 0x67 };
-	uint8_t sendfilenum[4] = { 0 };
-	uint8_t revallfile[] = { 0x72, 0x63, 0x76, 0x61, 0x6c, 0x6c };
+	uint8_t contactPackReq[] = {0x74, 0x68, 0x69, 0x73, 0x62, 0x33};
+	uint8_t contactPackAck[] = {0x74, 0x68, 0x69, 0x73, 0x73, 0x65, 0x76};
+	uint8_t sendDatPackReq[] = {0x72, 0x65, 0x71, 0x6d, 0x73, 0x67};
+	uint8_t sendDatPackAck[] = {0x72, 0x63, 0x76, 0x6d, 0x73, 0x67};
+	uint8_t sendfilenum[4] = {0};
+	uint8_t revallfile[] = {0x72, 0x63, 0x76, 0x61, 0x6c, 0x6c};
 
-	uint8_t     recv_data[recv_data_size];
-	int    recv_datalen = 0;
-	uint32_t  revPackNum = 0, revPacklenth;
-	uint32_t  binDataLen = 0, binFileLen = 0;
+	uint8_t recv_data[recv_data_size];
+	int recv_datalen = 0;
+	uint32_t revPackNum = 0, revPacklenth;
+	uint32_t binDataLen = 0, binFileLen = 0;
 	uint8_t stm32_version;
+	UINT fnum; /* æ–‡ä»¶æˆåŠŸè¯»å†™æ•°é‡ */
 	dog();
-	enum  File_Sta IAP_sta  = ServerIdle;
-	FILINFO finfno = { 0 };
+	enum File_Sta IAP_sta = ServerIdle;
+	FILINFO finfno = {0};
 	while (1)
 	{
 		switch (IAP_sta)
 		{
-		case ServerIdle: //·¢ËÍÎÕÊÖ°ü
+		case ServerIdle: //å‘é€æ¡æ‰‹åŒ…
 			send(socket, contactPackReq, 6, 0);
-//				send(socket, BUFF, 1, 0);
+			//				send(socket, BUFF, 1, 0);
 			recv_datalen = UP_read(socket, recv_data, 7, 2000);
-			if (recv_datalen<=0)
+			if (recv_datalen <= 0)
 			{
 				return recv_datalen;
 			}
 			if (memcmp(recv_data, contactPackAck, recv_datalen) == 0)
-//			if(memcmp(recv_data, RBUFF, recv_datalen) == 0)
+			//			if(memcmp(recv_data, RBUFF, recv_datalen) == 0)
 			{
-				IAP_sta =clientCnn;
+				IAP_sta = clientCnn;
 			}
 			break;
-		case clientCnn: ////Á¬½ÓÉÏ·şÎñÆ÷£¬ÇëÇó·¢ËÍbinÎÄ¼şĞÅÏ¢
+		case clientCnn: ////è¿æ¥ä¸ŠæœåŠ¡å™¨ï¼Œè¯·æ±‚å‘é€binæ–‡ä»¶ä¿¡æ¯
 			recv_datalen = 0;
 			send(socket, sendDatPackReq, 6, 0);
 			binDataLen = 0;
 			binFileLen = 0;
-			IAP_sta = clientReq; 
+			IAP_sta = clientReq;
 			break;
-		case clientReq: //»ñÈ¡binÎÄ¼şĞÅÏ¢
+		case clientReq: //è·å–binæ–‡ä»¶ä¿¡æ¯
 			recv_datalen = UP_read(socket, recv_data, 14, 2000);
 			if (recv_datalen <= 0)
 			{
 				return recv_datalen;
 			}
-				stm32_version = *(uint32_t*)(recv_data);
-				printf("stm32_version:%d\n", stm32_version);
-				binFileLen = *(uint32_t*)(recv_data + 10);
-				printf("binlen:%d\n", binFileLen);
-				recv_datalen = 0;
+			stm32_version = *(uint32_t *)(recv_data);
+			printf("stm32_version:%d\n", stm32_version);
+			binFileLen = *(uint32_t *)(recv_data + 10);
+			printf("binlen:%d\n", binFileLen);
+			recv_datalen = 0;
 			send(socket, sendDatPackAck, 6, 0);
 			//		retUSER = f_open(&USERFile, "1.txt", FA_CREATE_ALWAYS | FA_WRITE);
-//				retUSER = f_mkfs((TCHAR const*)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
-//			printf("retUSER %s\r\n", FR_Table[retUSER]);
+			//				retUSER = f_mkfs((TCHAR const*)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
+			//			printf("retUSER %s\r\n", FR_Table[retUSER]);
 			dog();
 			taskENTER_CRITICAL();
 			retUSER = f_open(&USERFile, DownloadFile, FA_CREATE_ALWAYS | FA_WRITE);
-				taskEXIT_CRITICAL();
+			taskEXIT_CRITICAL();
 			printf("retopen %s\r\n", FR_Table[retUSER]);
-				if (retUSER!= FR_OK)
-				{
-					//printf("retopen %s\r\n", FR_Table[retUSER]);
-					/* file Open for write Error */
-					printf("openerro\n");
-					return -1;
-					//while (1) ;
-				}
-				IAP_sta = senddatPak; 
-				revPackNum = 0;
+			if (retUSER != FR_OK)
+			{
+				//printf("retopen %s\r\n", FR_Table[retUSER]);
+				/* file Open for write Error */
+				printf("openerro\n");
+				return -1;
+				//while (1) ;
+			}
+			IAP_sta = senddatPak;
+			revPackNum = 0;
 			break;
-		case senddatPak://·¢ËÍÎÄ¼ş
+		case senddatPak: //å‘é€æ–‡ä»¶
 			printf("revPackNum:%d \n", revPackNum);
-		
+
 			sendfilenum[0] = (revPackNum >> 24) & 0x000000ff;
 			sendfilenum[1] = (revPackNum >> 16) & 0x000000ff;
 			sendfilenum[2] = (revPackNum >> 8) & 0x000000ff;
-			sendfilenum[3] = (revPackNum ) & 0x000000ff;
+			sendfilenum[3] = (revPackNum)&0x000000ff;
 			send(socket, sendfilenum, 4, 0);
-//			send(socket, "1", 1, 0);
-//			recv_datalen = 0;
+			//			send(socket, "1", 1, 0);
+			//			recv_datalen = 0;
 			dog();
 			revPacklenth = binFileLen - binDataLen;
 			printf("recvlenth:%d", revPacklenth);
@@ -403,73 +393,68 @@ int8_t IAP_upgread(int socket)
 			memset(recv_data, 0, recv_data_size);
 			recv_datalen = UP_read(socket, recv_data, revPacklenth, 2000);
 			printf("recv_len:%d\n", recv_datalen);
-			if (recv_datalen <=0)
+			if (recv_datalen <= 0)
 			{
 				f_close(&USERFile);
 				//f_unlink(DownloadFile);
 				return recv_datalen;
 			}
-			//Ğ£ÑéÊı¾İ°üÍ·
-			
-			printf("recvpack:%d\n", *(uint32_t*)(recv_data));
-			if(recv_datalen)//½ÓÊÕµ½Êı¾İ
+			//æ ¡éªŒæ•°æ®åŒ…å¤´
+
+			printf("recvpack:%d\n", *(uint32_t *)(recv_data));
+			if (recv_datalen) //æ¥æ”¶åˆ°æ•°æ®
 			{
-//				if (recv_datalen == 1034)
-//				{ 
-					if (*(uint32_t*)(recv_data) == revPackNum)
+				//				if (recv_datalen == 1034)
+				//				{
+				if (*(uint32_t *)(recv_data) == revPackNum)
+				{
+					revPacklenth = *(uint32_t *)(recv_data + 4);
+					if (recv_datalen == (revPacklenth + 10))
 					{
-						revPacklenth = *(uint32_t*)(recv_data + 4);
-						if (recv_datalen == (revPacklenth + 10))
-						{
-							binDataLen += *(uint32_t*)(recv_data + 4); 
-							dog();
-							taskENTER_CRITICAL();  //or portENTER_CRITICAL();
-							retUSER = f_write(&USERFile, recv_data + 10, recv_datalen - 10, &fnum);
-							taskEXIT_CRITICAL();    //or portEXIT_CRITICAL();
-							f_sync(&USERFile);
-							f_lseek(&USERFile, binDataLen);
-						}
-						if ((fnum == 0) || (retUSER != FR_OK))
-						{
-//							binDataLen -= *(uint32_t*)(recv_data + 4); 
-							/* 'STM32.TXT' file Write or EOF Error */
-													f_close(&USERFile);
-													
-							printf("writeerro\n");
-							//osDelay(3000);
-						
-							//						IAP_sta  = ServerIdle;
-													return -1;
-						} 
-						else
-						{
-							recv_datalen = 0;
-							revPackNum++;	
-						}
-			
-						if (binDataLen == binFileLen)
-						{
-						
-							IAP_sta = sendAllOk; 
-							f_close(&USERFile);
-							printf("-->Receive  Bin Finish\n");
-							//	HAL_Delay(2000);
-								printf("-->Reboot  Device  for Updata Bin \n");
-						}
-						else
-						{
-							printf("binDataLen:%d \n", binDataLen);
-							printf("Receive: %d%% Bin File\n", (binDataLen * 100 / binFileLen));
-							retUSER = -1;
-						}
+						binDataLen += *(uint32_t *)(recv_data + 4);
+						dog();
+						taskENTER_CRITICAL(); //or portENTER_CRITICAL();
+						retUSER = f_write(&USERFile, recv_data + 10, recv_datalen - 10, &fnum);
+						taskEXIT_CRITICAL(); //or portEXIT_CRITICAL();
+						f_sync(&USERFile);
+						f_lseek(&USERFile, binDataLen);
 					}
-//				}
+					if ((fnum == 0) || (retUSER != FR_OK))
+					{
+						//binDataLen -= *(uint32_t*)(recv_data + 4);
+						/* 'STM32.TXT' file Write or EOF Error */
+						f_close(&USERFile);
+						printf("writeerro\n");
+						return -1;
+					}
+					else
+					{
+						recv_datalen = 0;
+						revPackNum++;
+					}
+					if (binDataLen == binFileLen)
+					{
+						IAP_sta = sendAllOk;
+						f_close(&USERFile);
+						printf("-->Receive  Bin Finish\n");
+						//	HAL_Delay(2000);
+						printf("-->Reboot  Device  for Updata Bin \n");
+					}
+					else
+					{
+						printf("binDataLen:%d \n", binDataLen);
+						printf("Receive: %d%% Bin File\n", (binDataLen * 100 / binFileLen));
+						retUSER = -1;
+					}
+				}
+				//				}
 			}
 			break;
 		case sendAllOk:
 			send(socket, revallfile, 6, 0);
 			dog();
-			if (f_stat(DownloadFile, &finfno) != FR_OK) {
+			if (f_stat(DownloadFile, &finfno) != FR_OK)
+			{
 				/* 'STM32.TXT' file Open for write Error */
 				//return DOWNLOAD_FILE_FAIL;
 			}
@@ -481,54 +466,34 @@ int8_t IAP_upgread(int socket)
 			}
 			printf("feilsize:%d\n", finfno.fsize);
 			IAP_sta = 6;
-			printf("Êı¾İ½ÓÊÕÍê±Ï¿ªÊ¼Éı¼¶\n");
-			
+			printf("æ•°æ®æ¥æ”¶å®Œæ¯•å¼€å§‹å‡çº§\n");
 			__set_FAULTMASK(1);
 			HAL_NVIC_SystemReset();
-//			f_unlink(DownloadFile);
+			//	f_unlink(DownloadFile);
 			break;
 			//		case:
 			//			break;
-			//			
-			//		case:
-			//			break;
-			//		case:
-			//			break;
-			//		case:
-			//			break;
-			//		case:
-			//			break;
-			//		case:
-			//			break;
-			//		case:
-			//			break;
-			
-					default :
-						osDelay(100);
+		default:
+			osDelay(100);
 			break;
 		}
 	}
-//	rc = recv(socket, &buffer[bytes], (size_t)(len - bytes), 0);
-//	rc = send(socket, buffer, len, 0);	
-	
-	
 }
 
 void dog(void)
 {
 	HAL_GPIO_TogglePin(WDI_GPIO_Port, WDI_Pin);
 }
-int UP_read(int my_socket, unsigned char* buffer, int len, int timeout_ms)
+int UP_read(int my_socket, unsigned char *buffer, int len, int timeout_ms)
 {
 	TickType_t xTicksToWait = timeout_ms / portTICK_PERIOD_MS; /* convert milliseconds to ticks */
 	TimeOut_t xTimeOut;
-	struct timeval interval = { timeout_ms / 1000, (timeout_ms % 1000) * 1000 };
+	struct timeval interval = {timeout_ms / 1000, (timeout_ms % 1000) * 1000};
 	if (interval.tv_sec < 0 || (interval.tv_sec == 0 && interval.tv_usec <= 0))
 	{
 		interval.tv_sec = 0;
 		interval.tv_usec = 1000;
 	}
-	
 	int recvLen = 0;
 	vTaskSetTimeOutState(&xTimeOut); /* Record the time at which this function was entered. */
 	do
@@ -543,29 +508,7 @@ int UP_read(int my_socket, unsigned char* buffer, int len, int timeout_ms)
 			recvLen = rc;
 			break;
 		}
-	} while (recvLen < len && xTaskCheckForTimeOut(&xTimeOut,  &xTicksToWait) == pdFALSE);
+	} while (recvLen < len && xTaskCheckForTimeOut(&xTimeOut, &xTicksToWait) == pdFALSE);
 	return recvLen;
 }
-//int UP_read(int my_socket, unsigned char* buffer, int len, int timeout_ms)
-//{
-//	TickType_t xTicksToWait = timeout_ms / portTICK_PERIOD_MS; /* convert milliseconds to ticks */
-//	TimeOut_t xTimeOut;
-//	int recvLen = 0;
-//	vTaskSetTimeOutState(&xTimeOut); /* Record the time at which this function was entered. */
-//	do
-//	{
-//		int rc = 0;
-//		setsockopt(my_socket, 0, SO_RCVTIMEO, &xTicksToWait, sizeof(xTicksToWait));
-//		rc =recv(my_socket, buffer + recvLen, len - recvLen, 0);
-//		if (rc > 0)
-//			recvLen += rc;
-//		else if (rc < 0)
-//		{
-//			recvLen = rc;
-//			break;
-//		}
-//	} while (recvLen < len && xTaskCheckForTimeOut(&xTimeOut, &xTicksToWait) == pdFALSE);
-//	return recvLen;
-//}
-
 

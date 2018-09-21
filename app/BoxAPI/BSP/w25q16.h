@@ -50,106 +50,96 @@
 #ifndef __w25q16_H
 #define __w25q16_H
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
- 
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "spi.h"
-	 
-#define	 FLASH_SPI       hspi3  
-	 
-#define  FLASH_ID    0xEF4015	 
-	 
-#define  FLASH_L	   HAL_GPIO_WritePin(FLASH_CS_GPIO_Port,FLASH_CS_Pin,GPIO_PIN_RESET) ; 		//W25QXXÁöÑÁâáÈÄâ‰ø°Âè?
-#define  FLASH_H	 	HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_SET); //W25QXXÁöÑÁâáÈÄâ‰ø°Âè? 
-	 
 
-/* USER CODE BEGIN Includes */
- 
-/* USER CODE END Includes */
- 
+#define FLASH_SPI hspi3
 
- 
-/* USER CODE BEGIN Private defines */
- 
-/* USER CODE END Private defines */
- 
-extern void _Error_Handler(char *, int);
- 
+#define FLASH_ID 0xEF4015
 
- 
-/* USER CODE BEGIN Prototypes */
-	 static const char * FR_Table[] = 
-	 {
-		 "FR_OK£∫≥…π¶", /* (0) Succeeded */
-		 "FR_DISK_ERR£∫µ◊≤„”≤º˛¥ÌŒÛ", /* (1) A hard error occurred in the low level disk I/O layer */
-		 "FR_INT_ERR£∫∂œ—‘ ß∞‹", /* (2) Assertion failed */
-		 "FR_NOT_READY£∫ŒÔ¿Ì«˝∂Ø√ª”–π§◊˜",
-		 /* (3) The physical drive cannot work */
-		 "FR_NO_FILE£∫Œƒº˛≤ª¥Ê‘⁄", /* (4) Could not find the file */
-		 "FR_NO_PATH£∫¬∑æ∂≤ª¥Ê‘⁄", /* (5) Could not find the path */
-		 "FR_INVALID_NAME£∫Œﬁ–ßŒƒº˛√˚", /* (6) The path name format is invalid */
-		 "FR_DENIED£∫”…”⁄Ω˚÷π∑√Œ ªÚ’ﬂƒø¬º“—¬˙∑√Œ ±ªæ‹æ¯", /* (7) Access denied due to prohibited access or directory full */
-		 "FR_EXIST£∫Œƒº˛“—æ≠¥Ê‘⁄",
-		 /* (8) Access denied due to prohibited access */
-		 "FR_INVALID_OBJECT£∫Œƒº˛ªÚ’ﬂƒø¬º∂‘œÛŒﬁ–ß", /* (9) The file/directory object is invalid */
-		 "FR_WRITE_PROTECTED£∫ŒÔ¿Ì«˝∂Ø±ª–¥±£ª§", /* (10) The physical drive is write protected */
-		 "FR_INVALID_DRIVE£∫¬ﬂº≠«˝∂Ø∫≈Œﬁ–ß", /* (11) The logical drive number is invalid */
-		 "FR_NOT_ENABLED£∫æÌ÷–Œﬁπ§◊˜«¯",
-		 /* (12) The volume has no work area */
-		 "FR_NO_FILESYSTEM£∫√ª”–”––ßµƒFATæÌ",
-		 /* (13) There is no valid FAT volume */
-		 "FR_MKFS_ABORTED£∫”…”⁄≤Œ ˝¥ÌŒÛf_mkfs()±ª÷’÷π", /* (14) The f_mkfs() aborted due to any parameter error */
-		 "FR_TIMEOUT£∫‘⁄πÊ∂®µƒ ±º‰ƒ⁄Œﬁ∑®ªÒµ√∑√Œ æÌµƒ–Ìø…", /* (15) Could not get a grant to access the volume within defined period */
-		 "FR_LOCKED£∫”…”⁄Œƒº˛π≤œÌ≤ﬂ¬‘≤Ÿ◊˜±ªæ‹æ¯", /* (16) The operation is rejected according to the file sharing policy */
-		 "FR_NOT_ENOUGH_CORE£∫Œﬁ∑®∑÷≈‰≥§Œƒº˛√˚π§◊˜«¯",
-		 /* (17) LFN working buffer could not be allocated */
-		 "FR_TOO_MANY_OPEN_FILES£∫µ±«∞¥Úø™µƒŒƒº˛ ˝¥Û”⁄_FS_SHARE",
-		 /* (18) Number of open files > _FS_SHARE */
-		 "FR_INVALID_PARAMETER£∫≤Œ ˝Œﬁ–ß"	                     /* (19) Given parameter is invalid */
-	 };
-/* USER CODE END Prototypes */
- 
+#define FLASH_L HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_RESET); //W25QXXÁöÑÁâáÈÄâ‰ø°ÔøΩ?
+#define FLASH_H HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_SET);   //W25QXXÁöÑÁâáÈÄâ‰ø°ÔøΩ?
+
+  /* USER CODE BEGIN Includes */
+
+  /* USER CODE END Includes */
+
+  /* USER CODE BEGIN Private defines */
+
+  /* USER CODE END Private defines */
+
+  extern void _Error_Handler(char *, int);
+
+  /* USER CODE BEGIN Prototypes */
+  static const char *FR_Table[] =
+      {
+          "FR_OKÔºöÊàêÂäü",               /* (0) Succeeded */
+          "FR_DISK_ERRÔºöÂ∫ïÂ±ÇÁ°¨‰ª∂ÈîôËØØ", /* (1) A hard error occurred in the low level disk I/O layer */
+          "FR_INT_ERRÔºöÊñ≠Ë®ÄÂ§±Ë¥•",      /* (2) Assertion failed */
+          "FR_NOT_READYÔºöÁâ©ÁêÜÈ©±Âä®Ê≤°ÊúâÂ∑•‰Ωú",
+          /* (3) The physical drive cannot work */
+          "FR_NO_FILEÔºöÊñá‰ª∂‰∏çÂ≠òÂú®",                        /* (4) Could not find the file */
+          "FR_NO_PATHÔºöË∑ØÂæÑ‰∏çÂ≠òÂú®",                        /* (5) Could not find the path */
+          "FR_INVALID_NAMEÔºöÊó†ÊïàÊñá‰ª∂Âêç",                   /* (6) The path name format is invalid */
+          "FR_DENIEDÔºöÁî±‰∫éÁ¶ÅÊ≠¢ËÆøÈóÆÊàñËÄÖÁõÆÂΩïÂ∑≤Êª°ËÆøÈóÆË¢´ÊãíÁªù", /* (7) Access denied due to prohibited access or directory full */
+          "FR_EXISTÔºöÊñá‰ª∂Â∑≤ÁªèÂ≠òÂú®",
+          /* (8) Access denied due to prohibited access */
+          "FR_INVALID_OBJECTÔºöÊñá‰ª∂ÊàñËÄÖÁõÆÂΩïÂØπË±°Êó†Êïà", /* (9) The file/directory object is invalid */
+          "FR_WRITE_PROTECTEDÔºöÁâ©ÁêÜÈ©±Âä®Ë¢´ÂÜô‰øùÊä§",    /* (10) The physical drive is write protected */
+          "FR_INVALID_DRIVEÔºöÈÄªËæëÈ©±Âä®Âè∑Êó†Êïà",        /* (11) The logical drive number is invalid */
+          "FR_NOT_ENABLEDÔºöÂç∑‰∏≠Êó†Â∑•‰ΩúÂå∫",
+          /* (12) The volume has no work area */
+          "FR_NO_FILESYSTEMÔºöÊ≤°ÊúâÊúâÊïàÁöÑFATÂç∑",
+          /* (13) There is no valid FAT volume */
+          "FR_MKFS_ABORTEDÔºöÁî±‰∫éÂèÇÊï∞ÈîôËØØf_mkfs()Ë¢´ÁªàÊ≠¢",    /* (14) The f_mkfs() aborted due to any parameter error */
+          "FR_TIMEOUTÔºöÂú®ËßÑÂÆöÁöÑÊó∂Èó¥ÂÜÖÊó†Ê≥ïËé∑ÂæóËÆøÈóÆÂç∑ÁöÑËÆ∏ÂèØ", /* (15) Could not get a grant to access the volume within defined period */
+          "FR_LOCKEDÔºöÁî±‰∫éÊñá‰ª∂ÂÖ±‰∫´Á≠ñÁï•Êìç‰ΩúË¢´ÊãíÁªù",          /* (16) The operation is rejected according to the file sharing policy */
+          "FR_NOT_ENOUGH_COREÔºöÊó†Ê≥ïÂàÜÈÖçÈïøÊñá‰ª∂ÂêçÂ∑•‰ΩúÂå∫",
+          /* (17) LFN working buffer could not be allocated */
+          "FR_TOO_MANY_OPEN_FILESÔºöÂΩìÂâçÊâìÂºÄÁöÑÊñá‰ª∂Êï∞Â§ß‰∫é_FS_SHARE",
+          /* (18) Number of open files > _FS_SHARE */
+          "FR_INVALID_PARAMETERÔºöÂèÇÊï∞Êó†Êïà" /* (19) Given parameter is invalid */
+  };
+  /* USER CODE END Prototypes */
+
 #ifdef __cplusplus
 }
 #endif
 #endif /*__ spi_H */
- 
- 
- 
- 
+
 /***************FLASH API******************/
- 
+
 uint32_t SPI_FLASH_ReadID(void);
- 
-void SPI_FLASH_BufferWrite(uint8_t* pBuffer,uint32_t WriteAddr,uint32_t NumByteToWrite);
- 
-void SPI_FLASH_BufferRead(uint8_t* pBuffer, uint32_t ReadAddr, uint16_t NumByteToRead);
- 
-void SPI_FLASH_PageWrite(uint8_t* pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite);
- 
+
+void SPI_FLASH_BufferWrite(uint8_t *pBuffer, uint32_t WriteAddr, uint32_t NumByteToWrite);
+
+void SPI_FLASH_BufferRead(uint8_t *pBuffer, uint32_t ReadAddr, uint16_t NumByteToRead);
+
+void SPI_FLASH_PageWrite(uint8_t *pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite);
+
 void SPI_FLASH_SectorErase(uint32_t SectorAddr);
- 
+
 void SPI_FLASH_BulkErase(void);
- 
+
 void SPI_FLASH_WriteEnable(void);
- 
+
 void SPI_FLASH_WaitForWriteEnd(void);
- 
+
 void SPI_Flash_PowerDown(void);
- 
+
 void SPI_Flash_WAKEUP(void);
- 
- 
- 
- 
+
 /**
   * @}
   */
- 
+
 /**
   * @}
   */
- 
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

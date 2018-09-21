@@ -35,76 +35,71 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */ 
-  
+  */
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_nucleo_144.h"
 
-
 /** @defgroup BSP BSP
   * @{
-  */ 
+  */
 
 /** @defgroup STM32F4XX_NUCLEO_144 STM32F4XX NUCLEO 144
   * @{
-  */   
-    
+  */
+
 /** @defgroup STM32F4XX_NUCLEO_144_LOW_LEVEL STM32F4XX NUCLEO 144 LOW LEVEL
   * @brief This file provides set of firmware functions to manage Leds and push-button
   *        available on STM32F4xx-Nucleo Kit from STMicroelectronics.
   * @{
-  */ 
+  */
 
 /** @defgroup STM32F4XX_NUCLEO_144_LOW_LEVEL_Private_TypesDefinitions STM32F4XX NUCLEO 144 LOW LEVEL Private TypesDefinitions
   * @{
-  */ 
+  */
 /**
   * @}
-  */ 
-
+  */
 
 /** @defgroup STM32F4XX_NUCLEO_144_LOW_LEVEL_Private_Defines STM32F4XX NUCLEO 144 LOW LEVEL Private Defines
   * @{
-  */ 
+  */
 
 /**
   * @brief STM32F4xx NUCLEO BSP Driver version number V1.0.3
   */
-#define __STM32F4xx_NUCLEO_BSP_VERSION_MAIN   (0x01) /*!< [31:24] main version */
-#define __STM32F4xx_NUCLEO_BSP_VERSION_SUB1   (0x00) /*!< [23:16] sub1 version */
-#define __STM32F4xx_NUCLEO_BSP_VERSION_SUB2   (0x03) /*!< [15:8]  sub2 version */
-#define __STM32F4xx_NUCLEO_BSP_VERSION_RC     (0x00) /*!< [7:0]  release candidate */ 
-#define __STM32F4xx_NUCLEO_BSP_VERSION        ((__STM32F4xx_NUCLEO_BSP_VERSION_MAIN << 24)\
-                                             |(__STM32F4xx_NUCLEO_BSP_VERSION_SUB1 << 16)\
-                                             |(__STM32F4xx_NUCLEO_BSP_VERSION_SUB2 << 8 )\
-                                             |(__STM32F4xx_NUCLEO_BSP_VERSION_RC))   
+#define __STM32F4xx_NUCLEO_BSP_VERSION_MAIN (0x01) /*!< [31:24] main version */
+#define __STM32F4xx_NUCLEO_BSP_VERSION_SUB1 (0x00) /*!< [23:16] sub1 version */
+#define __STM32F4xx_NUCLEO_BSP_VERSION_SUB2 (0x03) /*!< [15:8]  sub2 version */
+#define __STM32F4xx_NUCLEO_BSP_VERSION_RC (0x00)   /*!< [7:0]  release candidate */
+#define __STM32F4xx_NUCLEO_BSP_VERSION ((__STM32F4xx_NUCLEO_BSP_VERSION_MAIN << 24) | (__STM32F4xx_NUCLEO_BSP_VERSION_SUB1 << 16) | (__STM32F4xx_NUCLEO_BSP_VERSION_SUB2 << 8) | (__STM32F4xx_NUCLEO_BSP_VERSION_RC))
 
 /**
   * @brief LINK SD Card
   */
-#define SD_DUMMY_BYTE            0xFF
-#define SD_NO_RESPONSE_EXPECTED  0x80
+#define SD_DUMMY_BYTE 0xFF
+#define SD_NO_RESPONSE_EXPECTED 0x80
 
 /**
   * @}
-  */ 
+  */
 
 /** @defgroup STM32F4XX_NUCLEO_144_LOW_LEVEL_Private_Macros STM32F4XX NUCLEO 144 LOW LEVEL Private Macros
   * @{
-  */ 
+  */
 /**
   * @}
-  */ 
+  */
 
 /** @defgroup STM32F4XX_NUCLEO_144_LOW_LEVEL_Private_Variables STM32F4XX NUCLEO 144 LOW LEVEL Private Variables
   * @{
-  */ 
-GPIO_TypeDef* GPIO_PORT[LEDn] = {LED1_GPIO_PORT, LED2_GPIO_PORT};
+  */
+GPIO_TypeDef *GPIO_PORT[LEDn] = {LED1_GPIO_PORT, LED2_GPIO_PORT};
 
 const uint16_t GPIO_PIN[LEDn] = {LED1_PIN, LED2_PIN};
 
-GPIO_TypeDef* BUTTON_PORT[BUTTONn] = {USER_BUTTON_GPIO_PORT}; 
-const uint16_t BUTTON_PIN[BUTTONn] = {USER_BUTTON_PIN}; 
+GPIO_TypeDef *BUTTON_PORT[BUTTONn] = {USER_BUTTON_GPIO_PORT};
+const uint16_t BUTTON_PIN[BUTTONn] = {USER_BUTTON_PIN};
 const uint8_t BUTTON_IRQn[BUTTONn] = {USER_BUTTON_EXTI_IRQn};
 
 /**
@@ -114,7 +109,7 @@ const uint8_t BUTTON_IRQn[BUTTONn] = {USER_BUTTON_EXTI_IRQn};
 #ifdef ADAFRUIT_TFT_JOY_SD_ID802
 #ifdef HAL_SPI_MODULE_ENABLED
 uint32_t SpixTimeout = NUCLEO_SPIx_TIMEOUT_MAX; /*<! Value of Timeout when SPI communication fails */
-static SPI_HandleTypeDef hnucleo_Spi; 
+static SPI_HandleTypeDef hnucleo_Spi;
 #endif /* HAL_SPI_MODULE_ENABLED */
 
 #ifdef HAL_ADC_MODULE_ENABLED
@@ -126,7 +121,7 @@ static ADC_ChannelConfTypeDef sConfig;
 
 /**
   * @}
-  */ 
+  */
 
 /** @defgroup STM32F4XX_NUCLEO_144_LOW_LEVEL_Private_FunctionPrototypes STM32F4XX NUCLEO 144 LOW LEVEL Private FunctionPrototypes
   * @{
@@ -164,11 +159,11 @@ static void ADCx_MspDeInit(ADC_HandleTypeDef *hadc);
 
 /**
   * @}
-  */ 
+  */
 
 /** @defgroup STM32F4XX_NUCLEO_144_LOW_LEVEL_Private_Functions STM32F4XX NUCLEO 144 LOW LEVEL Private Functions
   * @{
-  */ 
+  */
 
 /**
   * @brief  This method returns the STM32F4xx NUCLEO BSP Driver revision
@@ -189,19 +184,19 @@ uint32_t BSP_GetVersion(void)
   */
 void BSP_LED_Init(Led_TypeDef Led)
 {
-  GPIO_InitTypeDef  GPIO_InitStruct;
-  
+  GPIO_InitTypeDef GPIO_InitStruct;
+
   /* Enable the GPIO_LED Clock */
   LEDx_GPIO_CLK_ENABLE(Led);
-  
+
   /* Configure the GPIO_LED pin */
   GPIO_InitStruct.Pin = GPIO_PIN[Led];
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
-  
+
   HAL_GPIO_Init(GPIO_PORT[Led], &GPIO_InitStruct);
-  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_RESET); 
+  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_RESET);
 }
 
 /**
@@ -215,7 +210,7 @@ void BSP_LED_Init(Led_TypeDef Led)
   */
 void BSP_LED_DeInit(Led_TypeDef Led)
 {
-  GPIO_InitTypeDef  gpio_init_structure;
+  GPIO_InitTypeDef gpio_init_structure;
 
   /* Turn off LED */
   HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_RESET);
@@ -232,7 +227,7 @@ void BSP_LED_DeInit(Led_TypeDef Led)
   */
 void BSP_LED_On(Led_TypeDef Led)
 {
-  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_SET); 
+  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_SET);
 }
 
 /**
@@ -245,7 +240,7 @@ void BSP_LED_On(Led_TypeDef Led)
   */
 void BSP_LED_Off(Led_TypeDef Led)
 {
-  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_RESET); 
+  HAL_GPIO_WritePin(GPIO_PORT[Led], GPIO_PIN[Led], GPIO_PIN_RESET);
 }
 
 /**
@@ -274,11 +269,11 @@ void BSP_LED_Toggle(Led_TypeDef Led)
 void BSP_PB_Init(Button_TypeDef Button, ButtonMode_TypeDef ButtonMode)
 {
   GPIO_InitTypeDef GPIO_InitStruct;
-  
+
   /* Enable the BUTTON Clock */
   BUTTONx_GPIO_CLK_ENABLE(Button);
-  
-  if(ButtonMode == BUTTON_MODE_GPIO)
+
+  if (ButtonMode == BUTTON_MODE_GPIO)
   {
     /* Configure Button pin as input */
     GPIO_InitStruct.Pin = BUTTON_PIN[Button];
@@ -287,15 +282,15 @@ void BSP_PB_Init(Button_TypeDef Button, ButtonMode_TypeDef ButtonMode)
     GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
     HAL_GPIO_Init(BUTTON_PORT[Button], &GPIO_InitStruct);
   }
-  
-  if(ButtonMode == BUTTON_MODE_EXTI)
+
+  if (ButtonMode == BUTTON_MODE_EXTI)
   {
     /* Configure Button pin as input with External interrupt */
     GPIO_InitStruct.Pin = BUTTON_PIN[Button];
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING; 
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
     HAL_GPIO_Init(BUTTON_PORT[Button], &GPIO_InitStruct);
-    
+
     /* Enable and set Button EXTI Interrupt to the lowest priority */
     HAL_NVIC_SetPriority((IRQn_Type)(BUTTON_IRQn[Button]), 0x0F, 0x00);
     HAL_NVIC_EnableIRQ((IRQn_Type)(BUTTON_IRQn[Button]));
@@ -341,32 +336,32 @@ uint32_t BSP_PB_GetState(Button_TypeDef Button)
   */
 static void SPIx_MspInit(SPI_HandleTypeDef *hspi)
 {
-  GPIO_InitTypeDef  GPIO_InitStruct;  
-  
-  /*** Configure the GPIOs ***/  
+  GPIO_InitTypeDef GPIO_InitStruct;
+
+  /*** Configure the GPIOs ***/
   /* Enable GPIO clock */
   NUCLEO_SPIx_SCK_GPIO_CLK_ENABLE();
   NUCLEO_SPIx_MISO_MOSI_GPIO_CLK_ENABLE();
-  
+
   /* Configure SPI SCK */
   GPIO_InitStruct.Pin = NUCLEO_SPIx_SCK_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
   GPIO_InitStruct.Alternate = NUCLEO_SPIx_SCK_AF;
   HAL_GPIO_Init(NUCLEO_SPIx_SCK_GPIO_PORT, &GPIO_InitStruct);
 
-  /* Configure SPI MISO and MOSI */ 
+  /* Configure SPI MISO and MOSI */
   GPIO_InitStruct.Pin = NUCLEO_SPIx_MOSI_PIN;
   GPIO_InitStruct.Alternate = NUCLEO_SPIx_MISO_MOSI_AF;
-  GPIO_InitStruct.Pull  = GPIO_PULLDOWN;
-  HAL_GPIO_Init(NUCLEO_SPIx_MISO_MOSI_GPIO_PORT, &GPIO_InitStruct);
-  
-  GPIO_InitStruct.Pin = NUCLEO_SPIx_MISO_PIN;
-  GPIO_InitStruct.Pull  = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(NUCLEO_SPIx_MISO_MOSI_GPIO_PORT, &GPIO_InitStruct);
 
-  /*** Configure the SPI peripheral ***/ 
+  GPIO_InitStruct.Pin = NUCLEO_SPIx_MISO_PIN;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(NUCLEO_SPIx_MISO_MOSI_GPIO_PORT, &GPIO_InitStruct);
+
+  /*** Configure the SPI peripheral ***/
   /* Enable SPI clock */
   NUCLEO_SPIx_CLK_ENABLE();
 }
@@ -376,7 +371,7 @@ static void SPIx_MspInit(SPI_HandleTypeDef *hspi)
   */
 static void SPIx_Init(void)
 {
-  if(HAL_SPI_GetState(&hnucleo_Spi) == HAL_SPI_STATE_RESET)
+  if (HAL_SPI_GetState(&hnucleo_Spi) == HAL_SPI_STATE_RESET)
   {
     /* SPI Config */
     hnucleo_Spi.Instance = NUCLEO_SPIx;
@@ -388,7 +383,7 @@ static void SPIx_Init(void)
        to feat these constraints SPI baudrate is set to:
 	      - For STM32F412ZG devices: 12,5 MHz maximum (PCLK2/SPI_BAUDRATEPRESCALER_8 = 100 MHz/8 = 12,5 MHz)
 		  - For STM32F446ZE/STM32F429ZI devices: 11,25 MHz maximum (PCLK2/SPI_BAUDRATEPRESCALER_8 = 90 MHz/8 = 11,25 MHz)
-    */ 
+    */
     hnucleo_Spi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
     hnucleo_Spi.Init.Direction = SPI_DIRECTION_2LINES;
     hnucleo_Spi.Init.CLKPhase = SPI_PHASE_2EDGE;
@@ -416,10 +411,10 @@ static void SPIx_WriteReadData(const uint8_t *DataIn, uint8_t *DataOut, uint16_t
 {
   HAL_StatusTypeDef status = HAL_OK;
 
-  status = HAL_SPI_TransmitReceive(&hnucleo_Spi, (uint8_t*) DataIn, DataOut, DataLegnth, SpixTimeout);
-    
+  status = HAL_SPI_TransmitReceive(&hnucleo_Spi, (uint8_t *)DataIn, DataOut, DataLegnth, SpixTimeout);
+
   /* Check the communication status */
-  if(status != HAL_OK)
+  if (status != HAL_OK)
   {
     /* Execute user timeout callback */
     SPIx_Error();
@@ -435,10 +430,10 @@ static void SPIx_Write(uint8_t Value)
   HAL_StatusTypeDef status = HAL_OK;
   uint8_t data;
 
-  status = HAL_SPI_TransmitReceive(&hnucleo_Spi, (uint8_t*) &Value, &data, 1, SpixTimeout);
-  
+  status = HAL_SPI_TransmitReceive(&hnucleo_Spi, (uint8_t *)&Value, &data, 1, SpixTimeout);
+
   /* Check the communication status */
-  if(status != HAL_OK)
+  if (status != HAL_OK)
   {
     /* Execute user timeout callback */
     SPIx_Error();
@@ -448,11 +443,11 @@ static void SPIx_Write(uint8_t Value)
 /**
   * @brief  SPI error treatment function
   */
-static void SPIx_Error (void)
+static void SPIx_Error(void)
 {
   /* De-initialize the SPI communication BUS */
   HAL_SPI_DeInit(&hnucleo_Spi);
-  
+
   /* Re-Initiaize the SPI communication BUS */
   SPIx_Init();
 }
@@ -468,7 +463,7 @@ static void SPIx_Error (void)
   */
 void SD_IO_Init(void)
 {
-  GPIO_InitTypeDef  GPIO_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
   uint8_t counter;
 
   /* SD_CS_GPIO Periph clock enable */
@@ -481,9 +476,8 @@ void SD_IO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
   HAL_GPIO_Init(SD_CS_GPIO_PORT, &GPIO_InitStruct);
 
-
   /*  LCD chip select line perturbs SD also when the LCD is not used */
-  /*  this is a workaround to avoid sporadic failures during r/w operations */ 
+  /*  this is a workaround to avoid sporadic failures during r/w operations */
   LCD_CS_GPIO_CLK_ENABLE();
   GPIO_InitStruct.Pin = LCD_CS_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -495,10 +489,10 @@ void SD_IO_Init(void)
   /*------------Put SD in SPI mode--------------*/
   /* SD SPI Config */
   SPIx_Init();
-  
+
   /* SD chip select high */
   SD_CS_HIGH();
-  
+
   /* Send dummy byte 0xFF, 10 times with CS high */
   /* Rise CS and MOSI for 80 clocks cycles */
   for (counter = 0; counter <= 9; counter++)
@@ -514,7 +508,7 @@ void SD_IO_Init(void)
   */
 void SD_IO_CSState(uint8_t val)
 {
-  if(val == 1) 
+  if (val == 1)
   {
     SD_CS_HIGH();
   }
@@ -544,7 +538,7 @@ uint8_t SD_IO_WriteByte(uint8_t Data)
 {
   uint8_t tmp;
   /* Send the byte */
-  SPIx_WriteReadData(&Data,&tmp,1);
+  SPIx_WriteReadData(&Data, &tmp, 1);
   return tmp;
 }
 
@@ -554,12 +548,12 @@ uint8_t SD_IO_WriteByte(uint8_t Data)
   */
 void LCD_IO_Init(void)
 {
-  GPIO_InitTypeDef  GPIO_InitStruct;
-   
+  GPIO_InitTypeDef GPIO_InitStruct;
+
   /* LCD_CS_GPIO and LCD_DC_GPIO Periph clock enable */
   LCD_CS_GPIO_CLK_ENABLE();
   LCD_DC_GPIO_CLK_ENABLE();
-  
+
   /* Configure LCD_CS_PIN pin: LCD Card CS pin */
   GPIO_InitStruct.Pin = LCD_CS_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -570,10 +564,10 @@ void LCD_IO_Init(void)
   /* Configure LCD_DC_PIN pin: LCD Card DC pin */
   GPIO_InitStruct.Pin = LCD_DC_PIN;
   HAL_GPIO_Init(LCD_DC_GPIO_PORT, &GPIO_InitStruct);
-  
+
   /* LCD chip select high */
   LCD_CS_HIGH();
-  
+
   /* LCD SPI Config */
   SPIx_Init();
 }
@@ -586,13 +580,13 @@ void LCD_IO_WriteReg(uint8_t LCDReg)
 {
   /* Reset LCD control line CS */
   LCD_CS_LOW();
-  
+
   /* Set LCD data/command line DC to Low */
   LCD_DC_LOW();
-    
+
   /* Send Command */
   SPIx_Write(LCDReg);
-  
+
   /* Deselect : Chip Select high */
   LCD_CS_HIGH();
 }
@@ -606,13 +600,13 @@ void LCD_IO_WriteData(uint8_t Data)
 {
   /* Reset LCD control line CS */
   LCD_CS_LOW();
-  
+
   /* Set LCD data/command line DC to High */
   LCD_DC_HIGH();
 
   /* Send Data */
   SPIx_Write(Data);
-  
+
   /* Deselect : Chip Select high */
   LCD_CS_HIGH();
 }
@@ -626,10 +620,10 @@ void LCD_IO_WriteMultipleData(uint8_t *pData, uint32_t Size)
 {
   uint32_t counter = 0;
   __IO uint32_t data = 0;
-  
+
   /* Reset LCD control line CS */
   LCD_CS_LOW();
-  
+
   /* Set LCD data/command line DC to High */
   LCD_DC_HIGH();
 
@@ -645,29 +639,29 @@ void LCD_IO_WriteMultipleData(uint8_t *pData, uint32_t Size)
     /* Direct SPI accesses for optimization */
     for (counter = Size; counter != 0; counter--)
     {
-      while(((hnucleo_Spi.Instance->SR) & SPI_FLAG_TXE) != SPI_FLAG_TXE)
+      while (((hnucleo_Spi.Instance->SR) & SPI_FLAG_TXE) != SPI_FLAG_TXE)
       {
-      }  
+      }
       /* Need to invert bytes for LCD*/
-      *((__IO uint8_t*)&hnucleo_Spi.Instance->DR) = *(pData+1);
-      
-      while(((hnucleo_Spi.Instance->SR) & SPI_FLAG_TXE) != SPI_FLAG_TXE)
+      *((__IO uint8_t *)&hnucleo_Spi.Instance->DR) = *(pData + 1);
+
+      while (((hnucleo_Spi.Instance->SR) & SPI_FLAG_TXE) != SPI_FLAG_TXE)
       {
-      }  
-      *((__IO uint8_t*)&hnucleo_Spi.Instance->DR) = *pData;
+      }
+      *((__IO uint8_t *)&hnucleo_Spi.Instance->DR) = *pData;
       counter--;
       pData += 2;
     }
-    
-    /* Wait until the bus is ready before releasing Chip select */ 
-    while(((hnucleo_Spi.Instance->SR) & SPI_FLAG_BSY) != RESET)
+
+    /* Wait until the bus is ready before releasing Chip select */
+    while (((hnucleo_Spi.Instance->SR) & SPI_FLAG_BSY) != RESET)
     {
-    }  
-  } 
+    }
+  }
 
   /* Empty the Rx fifo */
   data = *(&hnucleo_Spi.Instance->DR);
-  UNUSED(data);  /* Remove GNU warning */
+  UNUSED(data); /* Remove GNU warning */
 
   /* Deselect : Chip Select high */
   LCD_CS_HIGH();
@@ -691,21 +685,21 @@ void LCD_Delay(uint32_t Delay)
   */
 static void ADCx_MspInit(ADC_HandleTypeDef *hadc)
 {
-  GPIO_InitTypeDef  GPIO_InitStruct;
-  
-  /*** Configure the GPIOs ***/  
+  GPIO_InitTypeDef GPIO_InitStruct;
+
+  /*** Configure the GPIOs ***/
   /* Enable GPIO clock */
   NUCLEO_ADCx_GPIO_CLK_ENABLE();
-  
+
   /* Configure the selected ADC Channel as analog input */
-  GPIO_InitStruct.Pin = NUCLEO_ADCx_GPIO_PIN ;
+  GPIO_InitStruct.Pin = NUCLEO_ADCx_GPIO_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(NUCLEO_ADCx_GPIO_PORT, &GPIO_InitStruct);
 
-  /*** Configure the ADC peripheral ***/ 
+  /*** Configure the ADC peripheral ***/
   /* Enable ADC clock */
-  NUCLEO_ADCx_CLK_ENABLE(); 
+  NUCLEO_ADCx_CLK_ENABLE();
 }
 
 /**
@@ -714,14 +708,14 @@ static void ADCx_MspInit(ADC_HandleTypeDef *hadc)
   */
 static void ADCx_MspDeInit(ADC_HandleTypeDef *hadc)
 {
-  GPIO_InitTypeDef  GPIO_InitStruct;
+  GPIO_InitTypeDef GPIO_InitStruct;
 
-  /*** DeInit the ADC peripheral ***/ 
+  /*** DeInit the ADC peripheral ***/
   /* Disable ADC clock */
-  NUCLEO_ADCx_CLK_DISABLE(); 
+  NUCLEO_ADCx_CLK_DISABLE();
 
   /* Configure the selected ADC Channel as analog input */
-  GPIO_InitStruct.Pin = NUCLEO_ADCx_GPIO_PIN ;
+  GPIO_InitStruct.Pin = NUCLEO_ADCx_GPIO_PIN;
   HAL_GPIO_DeInit(NUCLEO_ADCx_GPIO_PORT, GPIO_InitStruct.Pin);
 
   /* Disable GPIO clock has to be done by the application*/
@@ -733,20 +727,20 @@ static void ADCx_MspDeInit(ADC_HandleTypeDef *hadc)
   */
 static void ADCx_Init(void)
 {
-  if(HAL_ADC_GetState(&hnucleo_Adc) == HAL_ADC_STATE_RESET)
+  if (HAL_ADC_GetState(&hnucleo_Adc) == HAL_ADC_STATE_RESET)
   {
     /* ADC Config */
-    hnucleo_Adc.Instance                   = NUCLEO_ADCx;
-    hnucleo_Adc.Init.ClockPrescaler        = ADC_CLOCKPRESCALER_PCLK_DIV4; /* (must not exceed 36MHz) */
-    hnucleo_Adc.Init.Resolution            = ADC_RESOLUTION12b;
-    hnucleo_Adc.Init.DataAlign             = ADC_DATAALIGN_RIGHT;
-    hnucleo_Adc.Init.ContinuousConvMode    = DISABLE;
+    hnucleo_Adc.Instance = NUCLEO_ADCx;
+    hnucleo_Adc.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4; /* (must not exceed 36MHz) */
+    hnucleo_Adc.Init.Resolution = ADC_RESOLUTION12b;
+    hnucleo_Adc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+    hnucleo_Adc.Init.ContinuousConvMode = DISABLE;
     hnucleo_Adc.Init.DiscontinuousConvMode = DISABLE;
-    hnucleo_Adc.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;
-    hnucleo_Adc.Init.EOCSelection          = EOC_SINGLE_CONV;
-    hnucleo_Adc.Init.NbrOfConversion       = 1;
-    hnucleo_Adc.Init.DMAContinuousRequests = DISABLE;    
-    
+    hnucleo_Adc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+    hnucleo_Adc.Init.EOCSelection = EOC_SINGLE_CONV;
+    hnucleo_Adc.Init.NbrOfConversion = 1;
+    hnucleo_Adc.Init.DMAContinuousRequests = DISABLE;
+
     ADCx_MspInit(&hnucleo_Adc);
     HAL_ADC_Init(&hnucleo_Adc);
   }
@@ -757,8 +751,8 @@ static void ADCx_Init(void)
   */
 static void ADCx_DeInit(void)
 {
-  hnucleo_Adc.Instance   = NUCLEO_ADCx;
-    
+  hnucleo_Adc.Instance = NUCLEO_ADCx;
+
   HAL_ADC_DeInit(&hnucleo_Adc);
   ADCx_MspDeInit(&hnucleo_Adc);
 }
@@ -773,15 +767,15 @@ static void ADCx_DeInit(void)
 uint8_t BSP_JOY_Init(void)
 {
   uint8_t status = HAL_ERROR;
-   
+
   ADCx_Init();
-   
+
   /* Select the ADC Channel to be converted */
-  sConfig.Channel      = NUCLEO_ADCx_CHANNEL;
+  sConfig.Channel = NUCLEO_ADCx_CHANNEL;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-  sConfig.Rank         = 1;
+  sConfig.Rank = 1;
   status = HAL_ADC_ConfigChannel(&hnucleo_Adc, &sConfig);
-  
+
   /* Return Joystick initialization status */
   return status;
 }
@@ -810,38 +804,38 @@ void BSP_JOY_DeInit(void)
 JOYState_TypeDef BSP_JOY_GetState(void)
 {
   JOYState_TypeDef state;
-  uint16_t  keyconvertedvalue = 0;
-  
+  uint16_t keyconvertedvalue = 0;
+
   /* Start the conversion process */
   HAL_ADC_Start(&hnucleo_Adc);
-  
+
   /* Wait for the end of conversion */
   HAL_ADC_PollForConversion(&hnucleo_Adc, 10);
-  
+
   /* Check if the continuous conversion of regular channel is finished */
-  if((HAL_ADC_GetState(&hnucleo_Adc) & HAL_ADC_STATE_EOC_REG) == HAL_ADC_STATE_EOC_REG)
+  if ((HAL_ADC_GetState(&hnucleo_Adc) & HAL_ADC_STATE_EOC_REG) == HAL_ADC_STATE_EOC_REG)
   {
     /* Get the converted value of regular channel */
     keyconvertedvalue = HAL_ADC_GetValue(&hnucleo_Adc);
   }
-  
-  if((keyconvertedvalue > 2010) && (keyconvertedvalue < 2090))
+
+  if ((keyconvertedvalue > 2010) && (keyconvertedvalue < 2090))
   {
     state = JOY_UP;
   }
-  else if((keyconvertedvalue > 680) && (keyconvertedvalue < 780))
+  else if ((keyconvertedvalue > 680) && (keyconvertedvalue < 780))
   {
     state = JOY_RIGHT;
   }
-  else if((keyconvertedvalue > 1270) && (keyconvertedvalue < 1350))
+  else if ((keyconvertedvalue > 1270) && (keyconvertedvalue < 1350))
   {
     state = JOY_SEL;
   }
-  else if((keyconvertedvalue > 50) && (keyconvertedvalue < 130))
+  else if ((keyconvertedvalue > 50) && (keyconvertedvalue < 130))
   {
     state = JOY_DOWN;
   }
-  else if((keyconvertedvalue > 3680) && (keyconvertedvalue < 3760))
+  else if ((keyconvertedvalue > 3680) && (keyconvertedvalue < 3760))
   {
     state = JOY_LEFT;
   }
@@ -849,11 +843,11 @@ JOYState_TypeDef BSP_JOY_GetState(void)
   {
     state = JOY_NONE;
   }
-  
+
   /* Loop while a key is pressed */
-  if(state != JOY_NONE)
-  { 
-    keyconvertedvalue = HAL_ADC_GetValue(&hnucleo_Adc);  
+  if (state != JOY_NONE)
+  {
+    keyconvertedvalue = HAL_ADC_GetValue(&hnucleo_Adc);
   }
   /* Return the code of the Joystick key pressed */
   return state;
@@ -862,10 +856,9 @@ JOYState_TypeDef BSP_JOY_GetState(void)
 
 #endif /* ADAFRUIT_TFT_JOY_SD_ID802 */
 
-
 /**
   * @}
-  */ 
+  */
 
 /**
   * @}
@@ -873,10 +866,10 @@ JOYState_TypeDef BSP_JOY_GetState(void)
 
 /**
   * @}
-  */    
+  */
 
 /**
   * @}
-  */ 
-    
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

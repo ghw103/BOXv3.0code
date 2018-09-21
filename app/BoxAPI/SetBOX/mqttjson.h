@@ -26,20 +26,18 @@
 #define __RELAY_H__
 
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
- 
+
 /* Includes ------------------------------------------------------------------*/
 #include "common.h"
 #include "stm32f4xx_hal.h"
 #include "R8025t.h"
-/* Private define ------------------------------------------------------------*/
+  /* Private define ------------------------------------------------------------*/
 
-/* ########################## Assert Selection ############################## */
+  /* ########################## Assert Selection ############################## */
 
-
-void login(STDATETIME time);
-	 
-
+  void login(STDATETIME time);
 
 #endif

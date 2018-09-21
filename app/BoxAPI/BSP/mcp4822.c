@@ -10,41 +10,40 @@
 /*--------------------Local Variables---------------*/
 /*--------------------------------------------------*/
 
-
-
 // pointers to storage for the values to be written to MCP4822
 
 /*--------------------------------------------------*/
 /*---------------Public Functions-------------------*/
 /*--------------------------------------------------*/
 
-inline void spi1_dac_finalize(void) {
+inline void spi1_dac_finalize(void)
+{
 	// check (and if necessary, wait for) completion of SPI transfer.
-//	while(SPI2->SR & SPI_SR_BSY) {
-//		 // wait for BSY to clear
-//		;
-//	}
-//	HAL_GPIO_WritePin(spi2_cs_GPIO_Port, spi2_cs_Pin, GPIO_PIN_SET);	// SPI SS -> H
+	//	while(SPI2->SR & SPI_SR_BSY) {
+	//		 // wait for BSY to clear
+	//		;
+	//	}
+	//	HAL_GPIO_WritePin(spi2_cs_GPIO_Port, spi2_cs_Pin, GPIO_PIN_SET);	// SPI SS -> H
 }
 
-inline void spi1_dac_write_cha(uint16_t word) {
-	
+inline void spi1_dac_write_cha(uint16_t word)
+{
 
-//	 word &= 0x0fff ;	// strip any unwanted bits
+	//	 word &= 0x0fff ;	// strip any unwanted bits
 	word |= 0x1000;
 	HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET); // SS -> L
 	HAL_SPI_Transmit(&hspi1, (uint8_t *)&word, 1, 100);
 	HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET);
 }
 
-inline void spi1_dac_write_chb(uint16_t word) {
+inline void spi1_dac_write_chb(uint16_t word)
+{
 
-//	 word &= 0x0fff ;	// strip any unwanted bits
+	//	 word &= 0x0fff ;	// strip any unwanted bits
 	word |= 0x9000;
-	HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET);       // SS -> L
+	HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET); // SS -> L
 	HAL_SPI_Transmit(&hspi1, (uint8_t *)&word, 1, 100);
 	HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET);
-	
 }
 
 //========================================================
@@ -178,4 +177,3 @@ IIRFilter(filter_t * const filter, int16_t * const xn)
 	*xn = filter->yn_1;  // being 16 bit yn, so that's what we return.
 }
 */
-

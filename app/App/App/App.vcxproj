@@ -396,7 +396,6 @@
     <ClCompile Include="..\..\BoxAPI\Src\app_ethernet.c" />
     <ClCompile Include="..\..\BoxAPI\Src\BoxAPI.c" />
     <ClCompile Include="..\..\BoxAPI\Src\common.c" />
-    <ClCompile Include="..\..\BoxAPI\Src\eeprom.c" />
     <ClCompile Include="..\..\BoxAPI\Upgrade\command.c" />
     <ClCompile Include="..\..\BoxAPI\Upgrade\flash_if.c" />
     <ClCompile Include="..\..\BoxAPI\Upgrade\myiap.c" />

@@ -85,7 +85,7 @@
 #include "Relay.h"
 #include "ADS1230.h"
 #include "w25q16.h"
-#include "w25qxx.h" 
+#include "w25qxx.h"
 #include "cat1023.h"
 #include "BoxAPI.h"
 #include "log.h"
@@ -104,16 +104,15 @@ osThreadId FindMeTaskHandle;
 osThreadId serverTaskHandle;
 osThreadId sockoneTaskHandle;
 osThreadId socktwoTaskHandle;
-osThreadId sockthrTaskHandle;
+osThreadId sock485TaskHandle;
 osMessageQId recvQueueHandle;
 osMessageQId MBQueueHandle;
 osMessageQId SockoneQueueHandle;
 osMessageQId SocktwoQueueHandle;
-osMessageQId SockthrQueueHandle;
+osMessageQId Rs485QueueHandle;
 osMutexId MBholdingMutexHandle;
 osMutexId sockMutexoneHandle;
 osMutexId sockMutextwoHandle;
-osMutexId sockMutexthrHandle;
 osSemaphoreId TIMEBinarySemHandle;
 
 /* USER CODE BEGIN Variables */
@@ -131,13 +130,13 @@ void FindMe(void const * argument);
 void Sockserver(void const * argument);
 void sockone(void const * argument);
 void socktwo(void const * argument);
-void sockthr(void const * argument);
+void sock485(void const * argument);
 
 extern void MX_FATFS_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* USER CODE BEGIN FunctionPrototypes */
-
+uint8_t mqttstatus = 0;
 /* USER CODE END FunctionPrototypes */
 
 /* Hook prototypes */
@@ -146,7 +145,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-       
+
   /* USER CODE END Init */
 
   /* Create the mutex(es) */
@@ -162,12 +161,8 @@ void MX_FREERTOS_Init(void) {
   osMutexDef(sockMutextwo);
   sockMutextwoHandle = osMutexCreate(osMutex(sockMutextwo));
 
-  /* definition and creation of sockMutexthr */
-  osMutexDef(sockMutexthr);
-  sockMutexthrHandle = osMutexCreate(osMutex(sockMutexthr));
-
   /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
+	/* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
@@ -176,11 +171,11 @@ void MX_FREERTOS_Init(void) {
   TIMEBinarySemHandle = osSemaphoreCreate(osSemaphore(TIMEBinarySem), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+	/* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
+	/* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the thread(s) */
@@ -197,12 +192,12 @@ void MX_FREERTOS_Init(void) {
   periodTaskHandle = osThreadCreate(osThread(periodTask), NULL);
 
   /* definition and creation of MQTTTask */
-//  osThreadDef(MQTTTask, MQTT_clien, osPriorityAboveNormal, 0, 512);
-//  MQTTTaskHandle = osThreadCreate(osThread(MQTTTask), NULL);
-//
-//  /* definition and creation of MQTTCallTask */
-//  osThreadDef(MQTTCallTask, MQTTCall, osPriorityNormal, 0, 256);
-//  MQTTCallTaskHandle = osThreadCreate(osThread(MQTTCallTask), NULL);
+  osThreadDef(MQTTTask, MQTT_clien, osPriorityAboveNormal, 0, 512);
+  MQTTTaskHandle = osThreadCreate(osThread(MQTTTask), NULL);
+
+  /* definition and creation of MQTTCallTask */
+  osThreadDef(MQTTCallTask, MQTTCall, osPriorityNormal, 0, 256);
+  MQTTCallTaskHandle = osThreadCreate(osThread(MQTTCallTask), NULL);
 
   /* definition and creation of upgreadTask */
 //  osThreadDef(upgreadTask, Upgread, osPriorityHigh, 0, 2048);
@@ -224,12 +219,12 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(socktwoTask, socktwo, osPriorityNormal, 0, 384);
   socktwoTaskHandle = osThreadCreate(osThread(socktwoTask), NULL);
 
-  /* definition and creation of sockthrTask */
-  osThreadDef(sockthrTask, sockthr, osPriorityNormal, 0, 384);
-  sockthrTaskHandle = osThreadCreate(osThread(sockthrTask), NULL);
+  /* definition and creation of sock485Task */
+  osThreadDef(sock485Task, sock485, osPriorityAboveNormal, 0, 512);
+  sock485TaskHandle = osThreadCreate(osThread(sock485Task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+	/* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Create the queue(s) */
@@ -252,14 +247,14 @@ void MX_FREERTOS_Init(void) {
 ///* what about the sizeof here??? cd native code */
 //  osMessageQDef(SocktwoQueue, 2, struct netconn);
 //  SocktwoQueueHandle = osMessageCreate(osMessageQ(SocktwoQueue), NULL);
-//
-//  /* definition and creation of SockthrQueue */
-///* what about the sizeof here??? cd native code */
-//  osMessageQDef(SockthrQueue, 2, struct netconn);
-//  SockthrQueueHandle = osMessageCreate(osMessageQ(SockthrQueue), NULL);
+
+  /* definition and creation of Rs485Queue */
+/* what about the sizeof here??? cd native code */
+  osMessageQDef(Rs485Queue, 4, uint16_t);
+  Rs485QueueHandle = osMessageCreate(osMessageQ(Rs485Queue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+	/* add queues, ... */
 	/* what about the sizeof here??? cd native code */
 	osMessageQDef(SockoneQueue, 2, sizeof(struct netconn));
 	SockoneQueueHandle = osMessageCreate(osMessageQ(SockoneQueue), NULL);
@@ -269,67 +264,42 @@ void MX_FREERTOS_Init(void) {
 	osMessageQDef(SocktwoQueue, 2, sizeof(struct netconn));
 	SocktwoQueueHandle = osMessageCreate(osMessageQ(SocktwoQueue), NULL);
 
-	/* definition and creation of SockthrQueue */
-	/* what about the sizeof here??? cd native code */
-	osMessageQDef(SockthrQueue, 2, sizeof(struct netconn));
-	SockthrQueueHandle = osMessageCreate(osMessageQ(SockthrQueue), NULL);
+	
   /* USER CODE END RTOS_QUEUES */
 }
 
 /* StartDefaultTask function */
 void StartDefaultTask(void const * argument)
 {
-//		uint8_t upbufftest[32] = { 0x31, 0x39, 0x32, 0x2E, 0x31, 0x36, 0x38, 0x2E, 0x31, 0x2E, 0x31, 0x31, 0x33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x24, 0x26 };
   /* init code for FATFS */
   MX_FATFS_Init();
 
   /* USER CODE BEGIN StartDefaultTask */
-//	uint8_t buffff[300];
-//	W25QXX_Write((uint8_t*)upbufftest, 30, 32);
 	loadDHCPset(&dhcp_flage);
-//	W25QXX_Erase_Chip();
-//		fatfstest();
-//				restory();
-//	W25QXX_Read((uint8_t*)buffff, 0, 300);
-//	for (uint16_t i = 0; i < 300; i++)
-//	{
-//		printf("0x%x  ", buffff[i]);
-//	}
-	printf("ok\r\n");
-	if (dhcp_flage==0)
-	{
-		loadipar(NULL, NULL, NULL);
-	}
+	loadipar(NULL, NULL, NULL);
 	//dhcp_flage = 1;
 	/* Create tcp_ip stack thread */
 	tcpip_init(NULL, NULL);
-	//  
 	/* Initialize the LwIP stack */
 	Netif_Config();
-	//  
 	//	/* Initialize webserver demo */
 	////	http_server_netconn_init();
-	//  
+
 	/* Notify user about the network interface config */
-		User_notification(&gnetif);
-	
+	User_notification(&gnetif);
 	Init8025();
 	/* Start DHCPClient */
 	if (dhcp_flage)
 	{
 		osThreadDef(DHCP, DHCP_thread, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
-		osThreadCreate(osThread(DHCP), &gnetif); 
+		osThreadCreate(osThread(DHCP), &gnetif);
 	}
-
-
-
-  /* Infinite loop */
-  for(;;)
-  {
-	  
-	  osThreadTerminate(NULL);
-    osDelay(1);
-  }
+	/* Infinite loop */
+	for (;;)
+	{
+		osThreadTerminate(NULL);
+		osDelay(1);
+	}
   /* USER CODE END StartDefaultTask */
 }
 
@@ -344,20 +314,20 @@ void Monitor(void const * argument)
 	/* Infinite loop */
 	for (;;)
 	{
-//			  HAL_GPIO_TogglePin(WDI_GPIO_Port, WDI_Pin);
+		//			  HAL_GPIO_TogglePin(WDI_GPIO_Port, WDI_Pin);
 		//  HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
-//		  rede_adc();
-//		
+		//		  rede_adc();
+		//
 
 		HAL_IWDG_Refresh(&hiwdg);
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
-//  /* Infinite loop */
-//  for(;;)
-//  {
-//	  BSP_LED_Toggle(LED_GREEN); 
-//    osDelay(1000);
-//  }
+	//  /* Infinite loop */
+	//  for(;;)
+	//  {
+	//	  BSP_LED_Toggle(LED_GREEN);
+	//    osDelay(1000);
+	//  }
   /* USER CODE END Monitor */
 }
 
@@ -372,99 +342,90 @@ void Period(void const * argument)
 	uint8_t modeflage;
 	BaseType_t xResult;
 	uint8_t restoretime;
-	uint8_t pcWriteBuffer[500];
-	
-	
-//	I2C_EEPROM_ReadBuffer(EE_timeaddr, time_buf, 48);
-//	//
-//	I2C_EEPROM_ReadBuffer(EE_timeflageaddr, flage, 24);
-//	//	for (u_int8_t i = 0; i < 24; i++)
-//	//	{
-//	//		printf("dac%2d:%d  ", i, flage[i]);
-//	//	}
-//	I2C_EEPROM_ReadBuffer(EE_modeflageaddr, &modeflage, 1);
+
+#define COUNTOF(__BUFFER__) (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+	//	I2C_EEPROM_ReadBuffer(EE_timeaddr, time_buf, 48);
+	//	//
+	//	I2C_EEPROM_ReadBuffer(EE_timeflageaddr, flage, 24);
+	//	//	for (u_int8_t i = 0; i < 24; i++)
+	//	//	{
+	//	//		printf("dac%2d:%d  ", i, flage[i]);
+	//	//	}
+	//	I2C_EEPROM_ReadBuffer(EE_modeflageaddr, &modeflage, 1);
 	//	printf("mode:%d\n", modeflage);
 	restoretime = 0;
-	
-  /* Infinite loop */
-  for(;;)
-  {
-	  xResult = xSemaphoreTake(TIMEBinarySemHandle, (TickType_t)portMAX_DELAY);
-	  if (xResult == pdTRUE)
-	  {
-		  BSP_LED_On(LED_GREEN);
-		  //BSP_LED_Toggle(LED_GREEN);
-		  if(HAL_GPIO_ReadPin(restore_GPIO_Port, restore_Pin) == 0)
-		  {
-			  restoretime++;
-			  if (restoretime > 3)
-			  {
-				  restoretime = 0;
-				  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET);
-				  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-//				  while (!HAL_GPIO_ReadPin(restore_GPIO_Port, restore_Pin))
-//				  {
-//					  osDelay(10);
-//				  }
-				  restory();
-			  }
-		  }
-		  else
-		  {
-			  restoretime = 0;
-		  }
-		  HAL_GPIO_TogglePin(WDI_GPIO_Port, WDI_Pin);
-		
-		  UpdateDateTime(&time);
-		  if (modeflage == 0)
-		  {
-			  if (time.minute == 0)
-			  {
-				  if (flage[time.hour] == 1)
-				  {
-					  dac = (uint16_t)((time_buf[time.hour * 2] << 8) | time_buf[(time.hour * 2) + 1]);
 
-					  printf("time:%d dac:%d  \n", time.hour, dac);
-					  if (dac > 1000)
-					  {
-						  dac = 1000;
-					  }
-					  dac = dac * 3.055f;
-					  if (dac > 3055)
-						  dac = 3055;
-					  spi1_dac_write_chb(dac);
-					  spi1_dac_write_cha(dac);
-				  }
-			  }
-		  }
+	/* Infinite loop */
+	for (;;)
+	{
+		xResult = xSemaphoreTake(TIMEBinarySemHandle, (TickType_t)portMAX_DELAY);
+		if (xResult == pdTRUE)
+		{
+			BSP_LED_On(LED_GREEN);
+			//BSP_LED_Toggle(LED_GREEN);
+			if (HAL_GPIO_ReadPin(restore_GPIO_Port, restore_Pin) == 0)
+			{
+				restoretime++;
+				if (restoretime > 3)
+				{
+					restoretime = 0;
+					HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+					//				  while (!HAL_GPIO_ReadPin(restore_GPIO_Port, restore_Pin))
+					//				  {
+					//					  osDelay(10);
+					//				  }
+					restory();
+				}
+			}
+			else
+			{
+				restoretime = 0;
+			}
+			HAL_GPIO_TogglePin(WDI_GPIO_Port, WDI_Pin);
+			UpdateDateTime(&time);
+			if (modeflage == 0)
+			{
+				if (time.minute == 0)
+				{
+					if (flage[time.hour] == 1)
+					{
+						dac = (uint16_t)((time_buf[time.hour * 2] << 8) | time_buf[(time.hour * 2) + 1]);
 
-		  // DbgLog("ATgprs:%s", gprs_msg->usData);
-
-		  //  memset(&rs485_MSG, 0, sizeof(rs485_MSG));
-	  }
-	  else
-	  {
-		  /* 鐡掑懏妞? */
-		  //  ErrLog("鐡掑懏妞?");
-	  }
-//	  osThreadList((char *)&pcWriteBuffer);
-//	  printf("任务名     任务状态	优先级	 剩余栈 	任务序号\r\n");
-//	  printf("%s\r\n", pcWriteBuffer);  
-//	  	  sprintf((char *)time_buf,
-//	  		  "%04d-%02d-%02d %02d:%02d:%02d",
-//	  		  time.year + 2000,
-//	  		  time.month,
-//	  		  time.day,
-//	  		  time.hour,
-//	  		  time.minute,
-//	  		  time.second);
-//	  
-//	  	  printf("%s\n", time_buf);
-		
-	  //		login(time);
-	  		osDelay(50);
-	  BSP_LED_Off(LED_GREEN);
-  }
+						printf("time:%d dac:%d  \n", time.hour, dac);
+						if (dac > 1000)
+						{
+							dac = 1000;
+						}
+						dac = dac * 3.055f;
+						if (dac > 3055)
+							dac = 3055;
+						spi1_dac_write_chb(dac);
+						spi1_dac_write_cha(dac);
+					}
+				}
+			}
+		}
+		else
+		{
+			/* 澶辫触 */
+		}
+		//	  osThreadList((char *)&pcWriteBuffer);
+		//	    printf("浠诲姟鍚?     浠诲姟鐘舵??	浼樺厛绾?	 鍓╀綑鏍? 	浠诲姟搴忓彿\r\n");
+		//	  printf("%s\r\n", pcWriteBuffer);
+		//	  	  sprintf((char *)time_buf,
+		//	  		  "%04d-%02d-%02d %02d:%02d:%02d",
+		//	  		  time.year + 2000,
+		//	  		  time.month,
+		//	  		  time.day,
+		//	  		  time.hour,
+		//	  		  time.minute,
+		//	  		  time.second);
+		//
+		//	  	  printf("%s\n", time_buf);
+		osDelay(50);
+		BSP_LED_Off(LED_GREEN);
+	}
   /* USER CODE END Period */
 }
 
@@ -472,73 +433,80 @@ void Period(void const * argument)
 void MQTT_clien(void const * argument)
 {
   /* USER CODE BEGIN MQTT_clien */
-	
+
 	MQTTClient client;
 	Network network;
 	unsigned char sendbuf[80], readbuf[80];
-	int rc = 0; 
+	int rc = 0;
 	MQTTPacket_connectData connectData = MQTTPacket_connectData_initializer;
-
 	argument = 0;
+	char address[30] = {0};
+	uint16_t port = 0;
+	uint8_t mqttlock = 0;
+	loadMQTTpar(&mqttlock, address, &port);
+	if (mqttlock == 0)
+	{
+		for (;;)
+		{
+			vTaskDelete(NULL);
+			osDelay(10);
+		}
+	}
 	NetworkInit(&network);
 	MQTTClientInit(&client, &network, 30000, sendbuf, sizeof(sendbuf), readbuf, sizeof(readbuf));
-  /* Infinite loop */
-  for(;;)
-  {
-	  //	char* address = "45.40.243.84";
-		//	char* address = "176.122.166.83";
-		//	char* address = "66.154.108.162";
-			char* address = "192.168.1.113";
-			uint16_t port = 0;
-	  loadMQTTpar((char *)address, &port);
-	  	if((rc = NetworkConnect(&network, address, 1883)) != 0)
-	  		printf("Return code from network connect is %d\n", rc);
-
+	/* Infinite loop */
+	for (;;)
+	{
+		//	char* address = "45.40.243.84";
+		if ((rc = NetworkConnect(&network, address, port)) != 0)
+			printf("Return code from network connect is %d\n", rc);
 #if defined(MQTT_TASK)
-	  if ((rc = MQTTStartTask(&client)) != pdPASS)
-		  printf("Return code from start tasks is %d\n", rc);
+		if ((rc = MQTTStartTask(&client)) != pdPASS)
+			printf("Return code from start tasks is %d\n", rc);
 #endif
+		connectData.MQTTVersion = 3;
+		connectData.clientID.cstring = "mqtt1test";
+		connectData.keepAliveInterval = 10; //seconds
+											// connectData.cleansession = 1;
+		connectData.username.cstring = "";
+		connectData.password.cstring = "";
 
-	  connectData.MQTTVersion = 3;
-	  connectData.clientID.cstring = "mqtt1test";
-	  connectData.keepAliveInterval = 10;             //seconds
-	 // connectData.cleansession = 1;
-	  //	connectData.username.cstring = "gaohongwei/iot";
-	  	//	connectData.password.cstring = "f+Q9Lp++T5nysNVcLVfOWpIIDVz8MaVm5dyJA8jEXdU=";
+		if ((rc = MQTTConnect(&client, &connectData)) != 0)
+			printf("Return code from MQTT connect is %d\n", rc);
+		else
+			printf("MQTT Connected\n");
 
-	  	if((rc = MQTTConnect(&client, &connectData)) != 0)
-	  		printf("Return code from MQTT connect is %d\n", rc);
-	  else
-	  	printf("MQTT Connected\n");
+		if ((rc = MQTTSubscribe(&client, "test", 2, NULL)) != 0)
+			printf("Return code from MQTT subscribe is %d\n", rc);
+		/* Infinite loop */
+		for (;;)
+		{
 
-	  if ((rc = MQTTSubscribe(&client, "test", 2, NULL)) != 0)
-		  printf("Return code from MQTT subscribe is %d\n", rc);
-	  /* Infinite loop */
-	  for (;;)
-	  {
-	  
-		  MQTTMessage message;
-		  //			if (xQueueReceive(MBQueueHandle, &mylog, 10) == pdPASS)
-		  //			{
-		  //				printf("log:%s", mylog);
-		  ////				char payload[128];
-		  //				message.qos = 1;
-		  //				message.retained = 0;
-		  //				message.payload = mylog;
-		  //				//  sprintf(payload, "message number %d", count);
-		  //				  message.payloadlen = strlen(mylog);
-		  				if ((rc = MQTTPublish(&client, "log", &message)) != 0)
-		  //					printf("Return code from MQTT publish is %d\n", rc);
-		  //			}
-		  	if((rc = MQTTYield(&client, 100)) != 0)
-		  {
-			  printf("Return code from yield is %d\n", rc); 
-			  break;
-		  }
-		  osDelay(10);
-	  }
-    osDelay(1);
-  }
+			MQTTMessage message;
+			//			if (xQueueReceive(MBQueueHandle, &mylog, 10) == pdPASS)
+			//			{
+			//				printf("log:%s", mylog);
+			////				char payload[128];
+			//				message.qos = 1;
+			//				message.retained = 0;
+			//				message.payload = mylog;
+			//				//  sprintf(payload, "message number %d", count);
+			//				  message.payloadlen = strlen(mylog);
+			//		  				if ((rc = MQTTPublish(&client, "log", &message)) != 0)
+			//					printf("Return code from MQTT publish is %d\n", rc);
+			//			}
+			if ((rc = MQTTYield(&client, 100)) != 0)
+			{
+				printf("Return code from yield is %d\n", rc);
+				mqttstatus = 0;
+				close(network.my_socket);
+				break;
+			}
+			mqttstatus = 1;
+			osDelay(10);
+		}
+		osDelay(1000);
+	}
   /* USER CODE END MQTT_clien */
 }
 
@@ -546,11 +514,11 @@ void MQTT_clien(void const * argument)
 void MQTTCall(void const * argument)
 {
   /* USER CODE BEGIN MQTTCall */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	/* Infinite loop */
+	for (;;)
+	{
+		osDelay(1);
+	}
   /* USER CODE END MQTTCall */
 }
 
@@ -559,35 +527,24 @@ void Upgread(void const * argument)
 {
   /* USER CODE BEGIN Upgread */
 	int upsocket;
-	char  address[30] = { 0 };
-//	uint16_t port = 0;
-uint8_t workBuffer[_MAX_SS];
-	//fatfstest();
-	//char* address = 0;//"192.168.1.113";
+	char address[30] = {0};
 	uint16_t port = 0;
-	uint8_t recoon=10;
-//	printf("》串行FLASH还没有文件系统，即将进行格式化...\n");
-//	//		/* 格式化 */
-//	retUSER = f_mkfs((TCHAR const*)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
-//	printf("retmkfs %s\r\n", FR_Table[retUSER]);
-//	retUSER = f_mount(NULL, (TCHAR const*)USERPath, 0);	
-//	printf("retUSER %s\r\n", FR_Table[retUSER]);
-//	retUSER = f_mount(&USERFatFS, (TCHAR const*)USERPath, 0);
-//	printf("retUSER %s\r\n", FR_Table[retUSER]);
+
+	uint8_t workBuffer[_MAX_SS];
+	uint8_t recoon = 10;
+	retUSER = f_mkfs((TCHAR const *)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
+
+	retUSER = f_mount(NULL, (TCHAR const *)USERPath, 0);
+	retUSER = f_mount(&USERFatFS, (TCHAR const *)USERPath, 0);
+
 	loaduppar(address, &port);
-	printf("recoon:%d\r\n", recoon);
-	printf("recoon:%d\r\n", recoon);
-//	if (recoon==0)
-//	{
-//		vTaskDelete(NULL);
-//	}
 	/* Infinite loop */
 	for (;;)
 	{
 		HAL_GPIO_TogglePin(WDI_GPIO_Port, WDI_Pin);
 		while (recoon > 0)
 		{
-			if ((socketConnect(&upsocket, address, 9254)) >= 0)
+			if ((socketConnect(&upsocket, address, port)) >= 0)
 			{
 				if (IAP_upgread(upsocket) <= 0)
 				{
@@ -596,25 +553,21 @@ uint8_t workBuffer[_MAX_SS];
 				}
 				else
 				{
-					break ;
+					break;
 				}
-			}  
+			}
 			osDelay(900);
 			HAL_GPIO_TogglePin(WDI_GPIO_Port, WDI_Pin);
 			recoon--;
 		}
-//		HAL_IWDG_Refresh(&hiwdg);
 		f_unlink(DownloadFile);
-	__set_FAULTMASK(1);
+		__set_FAULTMASK(1);
 		HAL_NVIC_SystemReset();
-		//	IAP_upgread(upsocket);
 		while (1)
 		{
 			osDelay(100);
 		}
-		
 	}
- 
   /* USER CODE END Upgread */
 }
 
@@ -622,69 +575,69 @@ uint8_t workBuffer[_MAX_SS];
 void FindMe(void const * argument)
 {
   /* USER CODE BEGIN FindMe */
-	__I uint8_t nomcorrect[9] = { 0x09,(returnid+1), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74 };
-	__I uint8_t mqttcorrect[9] = { 0x09, (returnid+3), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74 }; 
-	__I uint8_t savecorrect[9] = { 0x09, (returnid + 5), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74 }; 
-	__I uint8_t upcorrect[9] = { 0x09, (returnid + 6), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74 };
-	__I uint8_t rebcorrect[9] = { 0x09, (returnid + 7), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74 };
-	__I uint8_t rescorrect[9] = { 0x09, (returnid + 8), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74 };
-	__I uint8_t findme[6] = { "FindB3" };
-	__I uint8_t readmqtt[10] = { "ReadB3mqtt" };
-	__I uint8_t readsta[12] = { "ReadB3status" };
-	__I uint8_t save[13] = { "Saveparameter" };
-	__I uint8_t upgrade[12] = { "UpgradeB3" };
-	__I uint8_t rebootb3[13] = { "RebootB3admin" };
-	__I uint8_t restoreb3[14] = { "RestoreB3admin" };
-	__I uint8_t correct[7] = { "correct" };
+	__I uint8_t nomcorrect[9] = {0x09, (returnid + 1), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74};
+	__I uint8_t mqttcorrect[9] = {0x09, (returnid + 3), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74};
+	__I uint8_t savecorrect[9] = {0x09, (returnid + 5), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74};
+	__I uint8_t upcorrect[9] = {0x09, (returnid + 6), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74};
+	__I uint8_t rebcorrect[9] = {0x09, (returnid + 7), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74};
+	__I uint8_t rescorrect[9] = {0x09, (returnid + 8), 0x63, 0x6f, 0x72, 0x72, 0x65, 0x63, 0x74};
+	__I uint8_t findme[6] = {"FindB3"};
+	__I uint8_t readmqtt[10] = {"ReadB3mqtt"};
+	__I uint8_t readsta[12] = {"ReadB3status"};
+	__I uint8_t save[13] = {"Saveparameter"};
+	__I uint8_t upgrade[12] = {"UpgradeB3"};
+	__I uint8_t rebootb3[13] = {"RebootB3admin"};
+	__I uint8_t restoreb3[14] = {"RestoreB3admin"};
+	__I uint8_t correct[7] = {"correct"};
 
 	uint32_t HWCRCValue = 0;
 	uint32_t RVCRCValue = 0;
-	unsigned char rec_buffer[200] = { 0 };   
-	uint8_t  parameter[200];
-	uint8_t  ipaddrbuff[60];
-	uint8_t  saveipflage= 0;
-	//unsigned char UDP_Server_SendBuf[RCV_BUFFER_LEN] = { "hello" };  
+	unsigned char rec_buffer[200] = {0};
+	uint8_t parameter[200];
+	uint8_t ipaddrbuff[62];
+	uint8_t saveipflage = 0;
+	//unsigned char UDP_Server_SendBuf[RCV_BUFFER_LEN] = { "hello" };
 	LWIP_UNUSED_ARG(argument);
-	uint8_t	optval = 1;
-	struct sockaddr_in  server, client;
-	int                 socket, RecvLen;
+	uint8_t optval = 1;
+	struct sockaddr_in server, client;
+	int socket, RecvLen;
 	socklen_t length = sizeof(struct sockaddr);
-	ip_addr_t  LocalIP;
+	ip_addr_t LocalIP;
 
 	memset(&server, 0, sizeof(struct sockaddr_in));
-	server.sin_family       = AF_INET;
-	server.sin_port         = htons(1992);  
-	server.sin_addr.s_addr  = htonl(INADDR_ANY);
-	socket = socket(AF_INET, SOCK_DGRAM, 0);    
+	server.sin_family = AF_INET;
+	server.sin_port = htons(1992);
+	server.sin_addr.s_addr = htonl(INADDR_ANY);
+	socket = socket(AF_INET, SOCK_DGRAM, 0);
 	setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (void *)&optval, sizeof(uint8_t));
-	bind(socket, (struct sockaddr *)&server, sizeof(server));  
+	bind(socket, (struct sockaddr *)&server, sizeof(server));
 	/* Infinite loop */
 	for (;;)
 	{
 		//mac
-	memset(rec_buffer,0,200);
-	memset(parameter, 0, 200);
-	HWCRCValue = 0;
-	RVCRCValue = 0;
-		RecvLen = recvfrom(socket, rec_buffer, sizeof(rec_buffer), 0, (struct sockaddr *)&client, &length);//
+		memset(rec_buffer, 0, 200);
+		memset(parameter, 0, 200);
+		HWCRCValue = 0;
+		RVCRCValue = 0;
+		RecvLen = recvfrom(socket, rec_buffer, sizeof(rec_buffer), 0, (struct sockaddr *)&client, &length); //
 		if (RecvLen > 0)
 		{
-			if (strncmp((char *)rec_buffer, (char *)findme, RecvLen) == 0)//findme ok
+			if (strncmp((char *)rec_buffer, (char *)findme, RecvLen) == 0) //findme ok
 			{
 				loadpar(parameter);
-				sendto(socket, parameter, 72, 0, (struct sockaddr *)&client, length);	
+				sendto(socket, parameter, 72, 0, (struct sockaddr *)&client, length);
 			}
-			else if (strncmp((char *)rec_buffer, (char *)readmqtt, RecvLen) == 0)//mqtt ok
+			else if (strncmp((char *)rec_buffer, (char *)readmqtt, RecvLen) == 0) //mqtt ok
 			{
 				loadparmqttbuf(parameter);
-				sendto(socket, parameter, 135, 0, (struct sockaddr *)&client, length);	
+				sendto(socket, parameter, 135, 0, (struct sockaddr *)&client, length);
 			}
-			else if (strncmp((char *)rec_buffer, (char *)readsta, RecvLen) == 0)//status ok 
+			else if (strncmp((char *)rec_buffer, (char *)readsta, RecvLen) == 0) //status ok
 			{
 				loadtime(parameter);
-				sendto(socket, parameter, 34, 0, (struct sockaddr *)&client, length);	
+				sendto(socket, parameter, 34, 0, (struct sockaddr *)&client, length);
 			}
-			else if(strncmp((char *)rec_buffer, (char *)save, RecvLen) == 0)//save  ok
+			else if (strncmp((char *)rec_buffer, (char *)save, RecvLen) == 0) //save  ok
 			{
 				msg_info("save\r\n");
 				if (saveipflage)
@@ -692,82 +645,81 @@ void FindMe(void const * argument)
 					savepar(ipaddrbuff);
 					memset(ipaddrbuff, 0, 62);
 					saveipflage = 0;
-					sendto(socket, (uint8_t *) savecorrect,9, 0, (struct sockaddr *)&client, length);		
+					sendto(socket, (uint8_t *)savecorrect, 9, 0, (struct sockaddr *)&client, length);
 				}
-				else sendto(socket, (uint8_t *) "error", 5, 0, (struct sockaddr *)&client, length);
-					
-						
+				else
+					sendto(socket, (uint8_t *)"error", 5, 0, (struct sockaddr *)&client, length);
 			}
-			else if(strncmp((char *)rec_buffer, (char *)upgrade, RecvLen) == 0)//upgrade
+			else if (strncmp((char *)rec_buffer, (char *)upgrade, RecvLen) == 0) //upgrade
 			{
 				msg_info("upgrade");
-				sendto(socket, (uint8_t *) upcorrect, 9, 0, (struct sockaddr *)&client, length);
+				sendto(socket, (uint8_t *)upcorrect, 9, 0, (struct sockaddr *)&client, length);
 				osDelay(10);
 				/* definition and creation of upgreadTask */
 				osThreadDef(upgreadTask, Upgread, osPriorityHigh, 0, 2048);
 				upgreadTaskHandle = osThreadCreate(osThread(upgreadTask), NULL);
 			}
-			else if(strncmp((char *)rec_buffer, (char *)rebootb3, RecvLen) == 0)//reboot ok
+			else if (strncmp((char *)rec_buffer, (char *)rebootb3, RecvLen) == 0) //reboot ok
 			{
 				msg_info("reboot\r\n");
-				sendto(socket, (uint8_t *) rebcorrect, 9, 0, (struct sockaddr *)&client, length);	
+				sendto(socket, (uint8_t *)rebcorrect, 9, 0, (struct sockaddr *)&client, length);
 				__set_FAULTMASK(1);
-				HAL_NVIC_SystemReset();	
+				HAL_NVIC_SystemReset();
 			}
-			else if(strncmp((char *)rec_buffer, (char *)restoreb3, RecvLen) == 0)//restore 
+			else if (strncmp((char *)rec_buffer, (char *)restoreb3, RecvLen) == 0) //restore
 			{
 				msg_info("restore\r\n");
-			//	sendto(socket, (uint8_t *) rescorrect, 9, 0, (struct sockaddr *)&client, length);	
+				//	sendto(socket, (uint8_t *) rescorrect, 9, 0, (struct sockaddr *)&client, length);
 				//W25QXX_Erase_Chip();
-				sendto(socket, (uint8_t *) rescorrect, 9, 0, (struct sockaddr *)&client, length);		
+				sendto(socket, (uint8_t *)rescorrect, 9, 0, (struct sockaddr *)&client, length);
 			}
-			else if(RecvLen == mqttstatus)//setmqtt ok
+			else if (RecvLen == setmqttbufflen) //setmqtt ok
 			{
-				if (rec_buffer[0] == 0x87&&rec_buffer[1]==0x67)
+				if (rec_buffer[0] == 0x87 && rec_buffer[1] == 0x68)
 				{
-					HWCRCValue = user_CRC( (uint8_t *)rec_buffer, 131);
-					RVCRCValue = (rec_buffer[131] << 24 | rec_buffer[132] << 16 | rec_buffer[133] << 8 | rec_buffer[134]); 
+					HWCRCValue = user_CRC((uint8_t *)rec_buffer, 131);
+					RVCRCValue = (rec_buffer[131] << 24 | rec_buffer[132] << 16 | rec_buffer[133] << 8 | rec_buffer[134]);
 					if (HWCRCValue == RVCRCValue)
 					{
 						saveparmqttbuf(rec_buffer);
-						sendto(socket, (uint8_t *) mqttcorrect, 9, 0, (struct sockaddr *)&client, length);
+						sendto(socket, (uint8_t *)mqttcorrect, 9, 0, (struct sockaddr *)&client, length);
 					}
 				}
 			}
-			else if(RecvLen == ipsetstastuslen)//setipaddrs ok
+			else if (RecvLen == ipsetstastuslen) //setipaddrs ok
 			{
-				if (rec_buffer[0] == 0x5c && rec_buffer[1]==0x66)
+				if (rec_buffer[0] == 0x5c && rec_buffer[1] == 0x66)
 				{
 					msg_info("ipset\r\n");
-					HWCRCValue = user_CRC( (uint8_t *)rec_buffer, 88);
+					HWCRCValue = user_CRC((uint8_t *)rec_buffer, 88);
 					RVCRCValue = (rec_buffer[88] << 24 | rec_buffer[89] << 16 | rec_buffer[90] << 8 | rec_buffer[91]);
-					
+
 					if (HWCRCValue == RVCRCValue)
 					{
 						memcpy(ipaddrbuff, rec_buffer, 62);
 						saveipflage = 1;
-						sendto(socket, (uint8_t *) nomcorrect, 9, 0, (struct sockaddr *)&client, length);
+						sendto(socket, (uint8_t *)nomcorrect, 9, 0, (struct sockaddr *)&client, length);
 					}
 				}
-			
-			//	savepar(rec_buffer);
-			//	loadpar(parameter);
-			//	sendto(socket, (uint8_t *) parameter, 66, 0, (struct sockaddr *)&client, length);
+
+				//	savepar(rec_buffer);
+				//	loadpar(parameter);
+				//	sendto(socket, (uint8_t *) parameter, 66, 0, (struct sockaddr *)&client, length);
 			}
-			else if(RecvLen == username)//setusrname ok
+			else if (RecvLen == setusername) //setusrname ok
 			{
-				if (strncmp((char *)rec_buffer+2, (char *)"passwd", 6) == 0)
+				if (strncmp((char *)rec_buffer + 2, (char *)"passwd", 6) == 0)
 				{
 					msg_info("setname\r\n");
-					saveuser((rec_buffer+8));
+					saveuser((rec_buffer + 8));
 					loaduser(parameter);
-					sendto(socket, (uint8_t *) parameter, 28, 0, (struct sockaddr *)&client, length);
-				//	msg_info("name:%s\r\n", parameter);
+					sendto(socket, (uint8_t *)parameter, 28, 0, (struct sockaddr *)&client, length);
+					//	msg_info("name:%s\r\n", parameter);
 				}
 			}
 			//sendto(socket, parameter, 5, 0, (struct sockaddr *)&client, length);
 		}
-		
+
 		osDelay(1);
 	}
   /* USER CODE END FindMe */
@@ -782,16 +734,16 @@ void Sockserver(void const * argument)
 	uint8_t oldcant = 0;
 	err_t err, accept_err;
 	BaseType_t xResult;
-	
+
 	struct netbuf *buf;
 	void *data;
 	u16_t len;
-	
+
 	LWIP_UNUSED_ARG(argument);
 	/* Create a new connection identifier. */
 	conn = netconn_new(NETCONN_TCP);
 	if (conn != NULL)
-	{  
+	{
 		/* Bind connection to well known port number 7. */
 		err = netconn_bind(conn, NULL, 8088);
 		printf("bind\r\n");
@@ -807,15 +759,15 @@ void Sockserver(void const * argument)
 				accept_err = netconn_accept(conn, &newconn);
 				printf("accept_err:%d\r\n", accept_err);
 				//		printf("newconn:%d\r\n",(int)&newconn->write_offset);
-					/* Process the new connection. */
-				if(accept_err == ERR_OK) 
+				/* Process the new connection. */
+				if (accept_err == ERR_OK)
 				{
 					for (;;)
 					{
-						if (xSemaphoreTake(sockMutexoneHandle,(TickType_t)50)	==	pdTRUE)
+						if (xSemaphoreTake(sockMutexoneHandle, (TickType_t)50) == pdTRUE)
 						{
-							xResult = xQueueSend(SockoneQueueHandle, (void*)&newconn, (TickType_t)5);			
-							if(xResult == pdPASS)
+							xResult = xQueueSend(SockoneQueueHandle, (void *)&newconn, (TickType_t)5);
+							if (xResult == pdPASS)
 							{
 								oldconn[0] = newconn;
 							}
@@ -823,7 +775,7 @@ void Sockserver(void const * argument)
 							{
 								printf("close00(newconn)\r\n");
 								netconn_close(newconn);
-								netconn_delete(newconn);                      
+								netconn_delete(newconn);
 							}
 							xSemaphoreGive(sockMutexoneHandle);
 							break;
@@ -832,40 +784,24 @@ void Sockserver(void const * argument)
 						{
 							xResult = xQueueSend(SocktwoQueueHandle, (struct netconn *)&newconn, (TickType_t)5);
 							if (xResult == pdPASS)
-							{							
+							{
 								oldconn[1] = newconn;
 							}
 							else
 							{
 								printf("close11(newconn)\r\n");
 								netconn_close(newconn);
-								netconn_delete(newconn);                      
+								netconn_delete(newconn);
 							}
 							xSemaphoreGive(sockMutextwoHandle);
-							break;
-						}
-						if (xSemaphoreTake(sockMutexthrHandle, (TickType_t)50) == pdTRUE)
-						{
-							xResult = xQueueSend(SockthrQueueHandle, (struct netconn *)&newconn, (TickType_t)5);
-							if (xResult == pdPASS)
-							{
-								oldconn[2] = newconn;
-							}
-							else
-							{
-								printf("close22(newconn)\r\n");
-								netconn_close(newconn);
-								netconn_delete(newconn);                      
-							}
-							xSemaphoreGive(sockMutexthrHandle);
 							break;
 						}
 						else
 						{
 							netconn_close(oldconn[oldcant]);
-							netconn_delete(oldconn[oldcant]); 
+							netconn_delete(oldconn[oldcant]);
 							oldcant++;
-							if (oldcant >= 3)
+							if (oldcant >= 2)
 							{
 								oldcant = 0;
 							}
@@ -873,22 +809,22 @@ void Sockserver(void const * argument)
 						}
 					}
 
-//					          while (netconn_recv(newconn, &buf) == ERR_OK) 
-//					          {
-//					            do 
-//					            {
-//					              netbuf_data(buf, &data, &len);
-//					              netconn_write(newconn, data, len, NETCONN_COPY);
-//					          
-//					            } 
-//					            while (netbuf_next(buf) >= 0);
-//					          
-//					            netbuf_delete(buf);
-//					          }
-//					//        
-//					//          /* Close connection and discard connection identifier. */
-//					          netconn_close(newconn);
-//					          netconn_delete(newconn);
+					//					          while (netconn_recv(newconn, &buf) == ERR_OK)
+					//					          {
+					//					            do
+					//					            {
+					//					              netbuf_data(buf, &data, &len);
+					//					              netconn_write(newconn, data, len, NETCONN_COPY);
+					//
+					//					            }
+					//					            while (netbuf_next(buf) >= 0);
+					//
+					//					            netbuf_delete(buf);
+					//					          }
+					//					//
+					//					//          /* Close connection and discard connection identifier. */
+					//					          netconn_close(newconn);
+					//					          netconn_delete(newconn);
 				}
 				osDelay(1);
 			}
@@ -907,14 +843,14 @@ void sockone(void const * argument)
 {
   /* USER CODE BEGIN sockone */
 	BaseType_t xResult;
-	struct netconn  *newconn;
+	struct netconn *newconn;
 	struct netbuf *buf;
-//	char* recv_buffer;
+	//	char* recv_buffer;
 	uint16_t len;
 	err_t err;
 	uint16_t crc;
-	uint8_t  error, lenth;
-	uint8_t * recv_buffer;
+	uint8_t error, lenth;
+	uint8_t *recv_buffer;
 	/* Infinite loop */
 	for (;;)
 	{
@@ -922,37 +858,37 @@ void sockone(void const * argument)
 		if (xResult == pdPASS)
 		{
 			netconn_set_recvtimeout(newconn, 40);
-			if (xSemaphoreTake(sockMutexoneHandle, (TickType_t)100)	==	pdTRUE)
+			if (xSemaphoreTake(sockMutexoneHandle, (TickType_t)100) == pdTRUE)
 			{
 				for (;;)
 				{
-					err = netconn_recv(newconn, &buf);  
+					err = netconn_recv(newconn, &buf);
 					if (err == ERR_OK)
 					{
-						do 
+						do
 						{
-							netbuf_data(buf,(void**)&recv_buffer, &len);
-							
+							netbuf_data(buf, (void **)&recv_buffer, &len);
+
 							crc = (recv_buffer[(len - 1)] << 8) | (recv_buffer[(len - 2)]);
-						//	printf("crc:%x\r\n", crc);
-						//	printf("mbcrc:%x\r\n", usMBCRC16((UCHAR *)recv_buffer, (len - 2)));
+							//	printf("crc:%x\r\n", crc);
+							//	printf("mbcrc:%x\r\n", usMBCRC16((UCHAR *)recv_buffer, (len - 2)));
 							if (crc != usMBCRC16((UCHAR *)recv_buffer, (len - 2)))
 							{
 								//printf("mbcrc:%x\r\n", usMBCRC16((UCHAR *)recv_buffer, (len - 2)));
 								//				close(conn);
-												break;
+								break;
 							}
-							decoding((uint8_t*)recv_buffer, &error, &lenth);
+							decoding((uint8_t *)recv_buffer, &error, &lenth);
 							len = len + lenth;
 							if (error == 1)
 							{
 								//				close(conn);
-												break;
+								break;
 							}
 							crc = usMBCRC16((UCHAR *)recv_buffer, (len - 2));
 							recv_buffer[(len - 1)] = crc >> 8;
 							recv_buffer[(len - 2)] = crc & 0xff;
-//							//taskENTER_CRITICAL();
+							//							//taskENTER_CRITICAL();
 							netconn_write(newconn, recv_buffer, len, NETCONN_COPY);
 							memset(recv_buffer, 0, len);
 							//taskEXIT_CRITICAL();
@@ -960,7 +896,7 @@ void sockone(void const * argument)
 						netbuf_delete(buf);
 					}
 					else if (err != ERR_TIMEOUT)
-					{ 
+					{
 						/* Close connection and discard connection identifier. */
 						if (err != ERR_CONN)
 						{
@@ -970,16 +906,15 @@ void sockone(void const * argument)
 						}
 						break;
 					}
-				}			
+				}
 				xSemaphoreGive(sockMutexoneHandle);
 			}
-			
 		}
 		//		else
 		//         {
-		//              
+		//
 		//         }
-		    osDelay(1);
+		osDelay(1);
 	}
   /* USER CODE END sockone */
 }
@@ -989,15 +924,15 @@ void socktwo(void const * argument)
 {
   /* USER CODE BEGIN socktwo */
 	BaseType_t xResult;
-	
-	struct netconn  *newconn;
+
+	struct netconn *newconn;
 	struct netbuf *buf;
-//	char *data;
+	//	char *data;
 	u16_t len;
 	err_t err;
 	uint16_t crc;
-	uint8_t  error, lenth;
-	uint8_t * recv_buffer;
+	uint8_t error, lenth;
+	uint8_t *recv_buffer;
 	/* Infinite loop */
 	for (;;)
 	{
@@ -1005,44 +940,44 @@ void socktwo(void const * argument)
 		if (xResult == pdPASS)
 		{
 			netconn_set_recvtimeout(newconn, 40);
-			if (xSemaphoreTake(sockMutextwoHandle, (TickType_t)100)	==	pdTRUE)
+			if (xSemaphoreTake(sockMutextwoHandle, (TickType_t)100) == pdTRUE)
 			{
 				for (;;)
 				{
-					err = netconn_recv(newconn, &buf);  
+					err = netconn_recv(newconn, &buf);
 					if (err == ERR_OK)
 					{
-						do 
+						do
 						{
-							netbuf_data(buf, (void**)&recv_buffer, &len);
-							
+							netbuf_data(buf, (void **)&recv_buffer, &len);
+
 							crc = (recv_buffer[(len - 1)] << 8) | (recv_buffer[(len - 2)]);
-						//	printf("crc:%x\r\n", crc);
+							//	printf("crc:%x\r\n", crc);
 							//	printf("mbcrc:%x\r\n", usMBCRC16((UCHAR *)recv_buffer, (len - 2)));
-								if(crc != usMBCRC16((UCHAR *)recv_buffer, (len - 2)))
+							if (crc != usMBCRC16((UCHAR *)recv_buffer, (len - 2)))
 							{
 								//printf("mbcrc:%x\r\n", usMBCRC16((UCHAR *)recv_buffer, (len - 2)));
 								//				close(conn);
-												break;
+								break;
 							}
-							decoding((uint8_t*)recv_buffer, &error, &lenth);
+							decoding((uint8_t *)recv_buffer, &error, &lenth);
 							len = len + lenth;
 							if (error == 1)
 							{
 								//				close(conn);
-												break;
+								break;
 							}
 							crc = usMBCRC16((UCHAR *)recv_buffer, (len - 2));
 							recv_buffer[(len - 1)] = crc >> 8;
 							recv_buffer[(len - 2)] = crc & 0xff;
 							//							//taskENTER_CRITICAL();
-														netconn_write(newconn, recv_buffer, len, NETCONN_COPY);
+							netconn_write(newconn, recv_buffer, len, NETCONN_COPY);
 							memset(recv_buffer, 0, len);
 						} while (netbuf_next(buf) >= 0);
 						netbuf_delete(buf);
 					}
 					else if (err != ERR_TIMEOUT)
-					{ 
+					{
 						/* Close connection and discard connection identifier. */
 						if (err != ERR_CONN)
 						{
@@ -1052,98 +987,29 @@ void socktwo(void const * argument)
 						}
 						break;
 					}
-				}			
+				}
 				xSemaphoreGive(sockMutextwoHandle);
 			}
 		}
 		//				 else
 		//         {
-		//              
+		//
 		//         }
-		    osDelay(1);
+		osDelay(1);
 	}
   /* USER CODE END socktwo */
 }
 
-/* sockthr function */
-void sockthr(void const * argument)
+/* sock485 function */
+void sock485(void const * argument)
 {
-  /* USER CODE BEGIN sockthr */
+  /* USER CODE BEGIN sock485 */
   /* Infinite loop */
-	BaseType_t xResult;
-	struct netconn  *newconn;
-	struct netbuf *buf;
-//	char *data;
-	u16_t len;
-	err_t err;
-	uint16_t crc;
-	uint8_t  error, lenth;
-	uint8_t * recv_buffer;
-	/* Infinite loop */
-	for (;;)
-	{
-		xResult = xQueueReceive(SockthrQueueHandle, (struct netconn *)&newconn, (TickType_t)osWaitForever);
-		if (xResult == pdPASS)
-		{
-			netconn_set_recvtimeout(newconn, 40);
-			if (xSemaphoreTake(sockMutexthrHandle, (TickType_t)100)	==	pdTRUE)
-			{
-				for (;;)
-				{
-					err = netconn_recv(newconn, &buf);  
-					if (err == ERR_OK)
-					{
-						do 
-						{
-							netbuf_data(buf, (void**)&recv_buffer, &len);
-							
-							crc = (recv_buffer[(len - 1)] << 8) | (recv_buffer[(len - 2)]);
-							//printf("crc:%x\r\n", crc);
-							//	printf("mbcrc:%x\r\n", usMBCRC16((UCHAR *)recv_buffer, (len - 2)));
-							if(crc != usMBCRC16((UCHAR *)recv_buffer, (len - 2)))
-							{
-								//printf("mbcrc:%x\r\n", usMBCRC16((UCHAR *)recv_buffer, (len - 2)));
-								//				close(conn);
-												break;
-							}
-							decoding((uint8_t*)recv_buffer, &error, &lenth);
-							len = len + lenth;
-							if (error == 1)
-							{
-								//				close(conn);
-												break;
-							}
-							crc = usMBCRC16((UCHAR *)recv_buffer, (len - 2));
-							recv_buffer[(len - 1)] = crc >> 8;
-							recv_buffer[(len - 2)] = crc & 0xff;
-							//							//taskENTER_CRITICAL();
-														netconn_write(newconn, recv_buffer, len, NETCONN_COPY);
-							memset(recv_buffer, 0, len);
-						} while (netbuf_next(buf) >= 0);
-						netbuf_delete(buf);
-					}
-					else if (err != ERR_TIMEOUT)
-					{ 
-						/* Close connection and discard connection identifier. */
-						if (err != ERR_CONN)
-						{
-							printf("close1\r\n");
-							netconn_close(newconn);
-							netconn_delete(newconn);
-						}
-						break;
-					}
-				}			
-				xSemaphoreGive(sockMutexthrHandle);
-			}
-		}
-		//				 else
-		//         {
-		//              
-		//         }
-		    osDelay(1);
-	}
-  /* USER CODE END sockthr */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END sock485 */
 }
 
 /* USER CODE BEGIN Application */

@@ -50,9 +50,10 @@
 #ifndef __MYIAP_H
 #define __MYIAP_H
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
- /* ------------------------ LWIP includes --------------------------------- */
+  /* ------------------------ LWIP includes --------------------------------- */
 #include "lwip/api.h"
 #include "lwip/tcpip.h"
 #include "lwip/memp.h"
@@ -70,27 +71,22 @@
 #ifndef TRUE
 #define TRUE 1
 #endif
-	 
-	 
- enum File_Sta
-{
-  ServerIdle = 0,  //·şÎñÆ÷¿ÕÏĞ
-  clientCnn,       //Á¬½ÓÉÏ¿Í»§¶Ë
-  clientReq,       //¿Í»§¶ËÇëÇóÊı¾İ 
-  senddatPak,      //·¢ÉúbinÎÄ¼şÊı¾İ°ü
-  sendAllOk,       //ËùÓĞ·¢ÉúÍê³É
-};
-	 
-typedef  void (*pFunction)(void); 
-	 
- extern const char DownloadFile[];
-	 
-	 
-	 int socketConnect(int* n, char* addr, int port);
-	 void fatfstest(void);
-	 void RunApplication(void);
-	 int8_t IAP_upgread(int socket);
-	 void dog(void);
-	 int UP_read(int my_socket, unsigned char* buffer, int len, int timeout_ms);
-	 
+  enum File_Sta
+  {
+    ServerIdle = 0, //æœåŠ¡å™¨ç©ºé—²
+    clientCnn,      //è¿æ¥ä¸Šå®¢æˆ·ç«¯
+    clientReq,      //å®¢æˆ·ç«¯è¯·æ±‚æ•°æ®
+    senddatPak,     //å‘ç”Ÿbinæ–‡ä»¶æ•°æ®åŒ…
+    sendAllOk,      //æ‰€æœ‰å‘ç”Ÿå®Œæˆ
+  };
+  typedef void (*pFunction)(void);
+  extern const char DownloadFile[];
+
+  int socketConnect(int *n, char *addr, int port);
+  void fatfstest(void);
+  void RunApplication(void);
+  int8_t IAP_upgread(int socket);
+  void dog(void);
+  int UP_read(int my_socket, unsigned char *buffer, int len, int timeout_ms);
+
 #endif

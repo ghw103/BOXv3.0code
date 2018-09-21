@@ -50,9 +50,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define MSG_INFO
-
 
 #ifdef ENABLE_IOT_WARN
 #define MSG_WARNING
@@ -61,10 +59,7 @@
 #define MSG_ERROR
 #endif
 
-
 #define MSG_DEBUG
-
-
 
 /**
  * @brief Debug level logging macro.
@@ -72,15 +67,14 @@
  * Macro to expose function, line number as well as desired log message.
  */
 #ifdef MSG_DEBUG
-#define msg_debug(...)    \
-	{\
-	printf("DEBUG:   %s L#%d", __func__, __LINE__);  \
-	printf(__VA_ARGS__); \
-	}
+#define msg_debug(...)                              \
+  {                                                 \
+    printf("DEBUG:   %s L#%d", __func__, __LINE__); \
+    printf(__VA_ARGS__);                            \
+  }
 #else
 #define msg_debug(...)
 #endif
-
 
 /**
  * @brief Info level logging macro.
@@ -89,9 +83,9 @@
  */
 #ifdef MSG_INFO
 #define msg_info(...)    \
-	{\
-	printf(__VA_ARGS__); \
-	}
+  {                      \
+    printf(__VA_ARGS__); \
+  }
 #else
 #define msg_info(...)
 #endif
@@ -102,11 +96,11 @@
  * Macro to expose function, line number as well as desired log message.
  */
 #ifdef MSG_WARNING
-#define msg_warning(...)   \
-	{ \
-	printf("WARN:  %s L#%d ", __func__, __LINE__);  \
-	printf(__VA_ARGS__); \
-	}
+#define msg_warning(...)                           \
+  {                                                \
+    printf("WARN:  %s L#%d ", __func__, __LINE__); \
+    printf(__VA_ARGS__);                           \
+  }
 #else
 #define msg_warning(...)
 #endif
@@ -117,11 +111,11 @@
  * Macro to expose function, line number as well as desired log message.
  */
 #ifdef MSG_ERROR
-#define msg_error(...)  \
-	{ \
-	printf("ERROR: %s L#%d ", __func__, __LINE__); \
-	printf(__VA_ARGS__); \
-	}
+#define msg_error(...)                             \
+  {                                                \
+    printf("ERROR: %s L#%d ", __func__, __LINE__); \
+    printf(__VA_ARGS__);                           \
+  }
 #else
 #define msg_error(...)
 #endif

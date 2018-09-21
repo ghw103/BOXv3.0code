@@ -23,26 +23,25 @@
 //#define ADS_CLK_DIR_OUT()       ADS_DIR |= ADS_CLK_BIT;
 //#define ADS_PD_DIR_OUT()        ADS_DIR |= ADS_PD_BIT;
 //
-//#define AD_IS_ON                (ADS_OUT & ADS_PD_BIT)                  
-//#define AD_ON()                 ADS_OUT |=  ADS_PD_BIT;                  
+//#define AD_IS_ON                (ADS_OUT & ADS_PD_BIT)
+//#define AD_ON()                 ADS_OUT |=  ADS_PD_BIT;
 //#define AD_OFF()                ADS_OUT &= ~ADS_PD_BIT;
 //
 //#define ADS_DATA_H()            ADS_OUT |= ADS_DATA_BIT;
 
-#define ADS_CLK_H()             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);  
-#define ADS_CLK_L()             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);  
+#define ADS_CLK_H() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
+#define ADS_CLK_L() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
 //
 //#define ADS_SPEED_H()             ADS_OUT |= ADS_SPEED_BIT;
 //#define ADS_SPEED_L()             ADS_OUT &= ~ADS_SPEED_BIT;
 
-
-#define ADS_DATA_HI              HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_14)
+#define ADS_DATA_HI HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14)
 //#define ADS_DATA_NOT_READY      (ADS_IN & ADS_DATA_BIT)//AD_CLK输出位1
 
 void InitADgpio(void);
-uint8_t filter(int32_t * adcsum);
-uint8_t  ReadAD(int32_t * ADdatatemp);// ReadAD(int32_t * ADdatatemp);    //读AD，从数据线上读取AD输出的数据,可在查询或中断中调用
-void  OffsetAD(void);  //失调校准，一般用来在启动AD后，进行一次AD校准
-void  InitADline(void);//初始化AD控制线，在启动AD前调用
+uint8_t filter(int32_t *adcsum);
+uint8_t ReadAD(int32_t *ADdatatemp); // ReadAD(int32_t * ADdatatemp);    //读AD，从数据线上读取AD输出的数据,可在查询或中断中调用
+void OffsetAD(void);                 //失调校准，一般用来在启动AD后，进行一次AD校准
+void InitADline(void);               //初始化AD控制线，在启动AD前调用
 #endif
 /************************************END***************************************/

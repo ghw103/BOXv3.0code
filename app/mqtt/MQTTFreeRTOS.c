@@ -191,7 +191,7 @@ error = connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 	else
 	{
 		//printf("Error connecting %d\n", error);
-close(sockfd);
+		close(sockfd);
 		return error;
 	}
 //	int type = SOCK_STREAM;

@@ -25,8 +25,9 @@
 #ifndef __RECOD_H__
 #define __RECOD_H__
 #ifdef __cplusplus
- extern "C" {
-#endif	
+extern "C"
+{
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "common.h"
@@ -35,59 +36,52 @@
 /* Private define ------------------------------------------------------------*/
 
 //控制
-#define  setrelay1 0x01
-#define  setrelay2 0x02
-#define  setrelay3 0x03
-#define  setrelay4 0x04
-#define  setrelay5 0x05
-#define  setrelay6 0x06
-#define  setrelay7 0x07
-#define  setrelay8 0x08
+#define setrelay1 0x01
+#define setrelay2 0x02
+#define setrelay3 0x03
+#define setrelay4 0x04
+#define setrelay5 0x05
+#define setrelay6 0x06
+#define setrelay7 0x07
+#define setrelay8 0x08
 
-#define  setdac1   0x0a
-#define  setdac2   0x0b
+#define setdac1 0x0a
+#define setdac2 0x0b
 //电流
-#define  converI   0x09
-#define  readI     0x26
+#define converI 0x09
+#define readI 0x26
 //时间
-#define set               0x3a 
-#define	set_Second        0x34  //秒寄存器
+#define set 0x3a
+#define set_Second 0x34 //秒寄存器
 
-#define	set_Minute        0x33  //分寄存器
+#define set_Minute 0x33 //分寄存器
 
-#define	set_Hour          0x32  //时寄存器
-#define	set_Week          0x39  //星期寄存器
-#define	set_Day           0x38  //日寄存器
-#define	set_Month         0x37  //月寄存器
-#define	set_Year          0x36  //年寄存器
+#define set_Hour 0x32  //时寄存器
+#define set_Week 0x39  //星期寄存器
+#define set_Day 0x38   //日寄存器
+#define set_Month 0x37 //月寄存器
+#define set_Year 0x36  //年寄存器
 //模式切换
-#define  set_mode         0x3c
-
+#define set_mode 0x3c
 
 //ip地址
-#define  setip1   0x3e
-#define  setip2   0x3f
+#define setip1 0x3e
+#define setip2 0x3f
 
-#define  setip3   0x42
-#define  setip4   0x43
-#define  setip5   0x44
-#define  setip6   0x46
-
+#define setip3 0x42
+#define setip4 0x43
+#define setip5 0x44
+#define setip6 0x46
 
 //定时
 
 //重启
-#define  reboot  
+#define reboot
 
-/* ########################## Assert Selection ############################## */
+  /* ########################## Assert Selection ############################## */
 
-#define  reB3Statuslen  12 
-extern uint8_t B3Status[reB3Statuslen] ;	 
-	 void decoding(uint8_t * data, uint8_t * error, uint8_t *lenth);
-	 
+#define reB3Statuslen 12
+  extern uint8_t B3Status[reB3Statuslen];
+  void decoding(uint8_t *data, uint8_t *error, uint8_t *lenth);
 
-	 
-	 
-	 
 #endif
-	 

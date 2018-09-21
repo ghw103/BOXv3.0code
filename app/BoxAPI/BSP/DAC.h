@@ -4,7 +4,8 @@
 #define DAC_h
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 #include "stm32f4xx_hal.h"
 /*--------------------------------------------------*/
@@ -19,22 +20,21 @@ extern "C" {
  */
 //#define DEBUG_PING
 
-
 /*
  * Bytes used to control the MCP4822 DAC
  */
-#define CH_A_OUT	0x10
-#define CH_B_OUT	0x90
+#define CH_A_OUT 0x10
+#define CH_B_OUT 0x90
 
-#define CH_A_OFF	0x00
-#define CH_B_OFF	0x80
+#define CH_A_OFF 0x00
+#define CH_B_OFF 0x80
 
 	// end an SPI transfer with this; this raises the SS signal
 	void spi1_dac_finalize(void);
-	
+
 	// void spi1_dac_write(uint16_t);	// internal function, called by the two following...
-	void spi1_dac_write_cha(uint16_t); 	// write 16 bits to DAC channel A
-	void spi1_dac_write_chb(uint16_t); 	// write 16 bits to DAC channel B
+	void spi1_dac_write_cha(uint16_t); // write 16 bits to DAC channel A
+	void spi1_dac_write_chb(uint16_t); // write 16 bits to DAC channel B
 
 //==================================================
 //****************** IIR Filter ******************//
@@ -103,10 +103,6 @@ typedef struct __attribute__ ((packed)) _filter_t {
 /*--------------------------------------------------*/
 /*----------Public Function Definitions-------------*/
 /*--------------------------------------------------*/
-
-
-
-
 
 //==================================================
 //****************** IIR Filter ******************//

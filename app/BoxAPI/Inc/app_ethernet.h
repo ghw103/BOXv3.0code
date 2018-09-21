@@ -47,49 +47,51 @@
 #define __APP_ETHERNET_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "lwip/netif.h"
 
-/* Exported types ------------------------------------------------------------*/
-	 /* Semaphore to signal Ethernet Link state update */
-//extern	 osSemaphoreId Netif_LinkSemaphore ;
-	 /* Ethernet link thread Argument */
-extern	 struct link_str link_arg;
-extern	 struct netif gnetif;
-extern uint8_t IP_ADDRESS[4];
-extern uint8_t NETMASK_ADDRESS[4];
-extern uint8_t GATEWAY_ADDRESS[4];	 
-extern uint8_t dhcp_flage;
-	 
-#define	 USE_DHCP
+  /* Exported types ------------------------------------------------------------*/
+  /* Semaphore to signal Ethernet Link state update */
+  //extern	 osSemaphoreId Netif_LinkSemaphore ;
+  /* Ethernet link thread Argument */
+  extern struct link_str link_arg;
+  extern struct netif gnetif;
+  extern uint8_t IP_ADDRESS[4];
+  extern uint8_t NETMASK_ADDRESS[4];
+  extern uint8_t GATEWAY_ADDRESS[4];
+  extern uint8_t dhcp_flage;
+
+#define USE_DHCP
 #define USE_LCD
-	 /** MAC address. */
-	 typedef struct {
-		 uint8_t mac[6];
-	 } net_macaddr_t;
-	 
+  /** MAC address. */
+  typedef struct
+  {
+    uint8_t mac[6];
+  } net_macaddr_t;
+
 /* Exported constants --------------------------------------------------------*/
 /* DHCP process states */
-#define DHCP_OFF                   (uint8_t) 0
-#define DHCP_START                 (uint8_t) 1
-#define DHCP_WAIT_ADDRESS          (uint8_t) 2
-#define DHCP_ADDRESS_ASSIGNED      (uint8_t) 3
-#define DHCP_TIMEOUT               (uint8_t) 4
-#define DHCP_LINK_DOWN             (uint8_t) 5
-   
-/* Exported macro ------------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
-void User_notification(struct netif *netif);
-void Netif_Config(void);
-	 int net_get_mac_address(struct netif *netif, uint8_t* macAddress);	
-	 int net_get_ipaddress(struct netif *netif, uint8_t* ipAddress);
-	 
+#define DHCP_OFF (uint8_t)0
+#define DHCP_START (uint8_t)1
+#define DHCP_WAIT_ADDRESS (uint8_t)2
+#define DHCP_ADDRESS_ASSIGNED (uint8_t)3
+#define DHCP_TIMEOUT (uint8_t)4
+#define DHCP_LINK_DOWN (uint8_t)5
+
+  /* Exported macro ------------------------------------------------------------*/
+  /* Exported functions ------------------------------------------------------- */
+  void User_notification(struct netif *netif);
+  void Netif_Config(void);
+  int net_get_mac_address(struct netif *netif, uint8_t *macAddress);
+  int net_get_ipaddress(struct netif *netif, uint8_t *ipAddress);
+
 #ifdef USE_DHCP
-void DHCP_thread(void const * argument);
-#endif 
+  void DHCP_thread(void const *argument);
+#endif
 
 #ifdef __cplusplus
 }
@@ -97,6 +99,4 @@ void DHCP_thread(void const * argument);
 
 #endif /* __APP_ETHERNET_H */
 
-
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-

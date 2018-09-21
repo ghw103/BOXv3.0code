@@ -4,7 +4,7 @@
  */
 
 ENTRY(Reset_Handler)
-_estack = 0x20020000;
+
 MEMORY
 {
 	FLASH (RX)   : ORIGIN = 0x08020000, LENGTH = 512K
@@ -12,7 +12,7 @@ MEMORY
 	CCMRAM (RWX) : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
-
+_estack = 0x20020000;
 
 SECTIONS
 {
@@ -89,6 +89,18 @@ SECTIONS
 	. = ALIGN(4);
 	_sidata = .;
 
+	
+	  .f4ccmram :
+	  {
+		. = ALIGN(4);
+		_sf4ccmram = .;       /* create a global symbol at ccmram start */
+		*(.f4ccmram)
+		*(.f4ccmram*)
+	
+		. = ALIGN(4);
+		_ef4ccmram = .;       /* create a global symbol at ccmram end */
+	  } >CCMRAM
+
 	.data : AT(_sidata)
 	{
 		. = ALIGN(4);
@@ -116,7 +128,7 @@ SECTIONS
 		_ebss = .;
 
 		PROVIDE(__bss_end__ = _ebss);
-	} > SRAM
+	}> SRAM
 
 	PROVIDE(end = .);
 
@@ -139,4 +151,5 @@ SECTIONS
 	} > SRAM
 
 }
+
 

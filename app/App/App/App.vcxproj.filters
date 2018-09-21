@@ -1209,9 +1209,6 @@
     <ClCompile Include="..\..\BoxAPI\Src\common.c">
       <Filter>Source files\BoxAPI\Src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\BoxAPI\Src\eeprom.c">
-      <Filter>Source files\BoxAPI\Src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\BoxAPI\Upgrade\command.c">
       <Filter>Source files\BoxAPI\Upgrade</Filter>
     </ClCompile>

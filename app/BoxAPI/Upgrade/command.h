@@ -47,10 +47,9 @@ extern "C"
   /* Includes ------------------------------------------------------------------*/
 #include "flash_if.h"
 
-
   /* Exported types ------------------------------------------------------------*/
   /* Exported constants --------------------------------------------------------*/
-  enum  /* Error code */
+  enum /* Error code */
   {
     DOWNLOAD_OK = 0,
     DOWNLOAD_FAIL,
@@ -70,6 +69,6 @@ extern "C"
 }
 #endif
 
-#endif  /* _COMMAND_H */
+#endif /* _COMMAND_H */
 
 /*******************(C)COPYRIGHT STMicroelectronics *****END OF FILE******/

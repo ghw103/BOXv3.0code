@@ -33,16 +33,11 @@
 
 /* ########################## Assert Selection ############################## */
 
-
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
-	 
-	 
-void  relaycontrol(DO realynumber, uint8_t DI);
 
-	 
-	 
-	 
-	 
+  void relaycontrol(DO realynumber, uint8_t DI);
+
 #endif

@@ -12,9 +12,6 @@
 #include "cmsis_os.h"
 #include "math.h"
 
-
-
-
 /*****************************************************************************
 函数名称：ReadAD(void)
 功    能：读AD
@@ -23,65 +20,64 @@
 使用资源：无
 ******************************************************************************/
 
-int32_t  offset;
+int32_t offset;
 
-uint8_t filter(int32_t * adcsum)
+uint8_t filter(int32_t *adcsum)
 {
-	int32_t  value_buff;
+	int32_t value_buff;
 	*adcsum = 0;
 	//	osDelay(500);
-		if(ReadAD(&value_buff)) 
+	if (ReadAD(&value_buff))
 	{
 		*adcsum = 0xffff;
 		return 1;
 	}
-	
-//	if (value_buff==0)
-//	{
-//		printf("read0\n");
-//	}
-//	printf("adc:%d\n", value_buff);
-//	*adcsum = value_buff ;
+
+	//	if (value_buff==0)
+	//	{
+	//		printf("read0\n");
+	//	}
+	//	printf("adc:%d\n", value_buff);
+	//	*adcsum = value_buff ;
 	*adcsum = value_buff - offset;
-		if (*adcsum<0)
+	if (*adcsum < 0)
 	{
 		*adcsum = 0;
 	}
-//	printf("ji:%d\n", *adcsum);
-//	*adcsum =	5 * (*adcsum / ((1L << 20) *68 * (0.00015 / 1000)));
-//	2.5f / (*adcsum / (1L << 20))
-//		*adcsum=(*adcsum*(2.5f / (1L << 20))) / 64 / 30;
-////	*adcsum =	 (*adcsum / 42)*20;
-//	*adcsum = *adcsum*(1.2 - (0.000448**adcsum));
-//	printf("jisuan:%d\n",* adcsum);
+	//	printf("ji:%d\n", *adcsum);
+	//	*adcsum =	5 * (*adcsum / ((1L << 20) *68 * (0.00015 / 1000)));
+	//	2.5f / (*adcsum / (1L << 20))
+	//		*adcsum=(*adcsum*(2.5f / (1L << 20))) / 64 / 30;
+	////	*adcsum =	 (*adcsum / 42)*20;
+	//	*adcsum = *adcsum*(1.2 - (0.000448**adcsum));
+	//	printf("jisuan:%d\n",* adcsum);
 
-	return 0;	
+	return 0;
 }
 
-uint8_t  ReadAD(int32_t * ADdatatemp)
+uint8_t ReadAD(int32_t *ADdatatemp)
 {
 	uint16_t Timeout = 1000;
 	uint32_t tickstart = 0U;
-	int16_t  _raw[2];
+	int16_t _raw[2];
 	tickstart = HAL_GetTick();
 	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14))
 	{
-			/* Timeout management */
-			if ((Timeout == 0U) || ((Timeout != HAL_MAX_DELAY) && ((HAL_GetTick() - tickstart) >=  Timeout)))
-			{
-			   return 1;
-			}
+		/* Timeout management */
+		if ((Timeout == 0U) || ((Timeout != HAL_MAX_DELAY) && ((HAL_GetTick() - tickstart) >= Timeout)))
+		{
+			return 1;
+		}
 		osDelay(1);
 	}
-	HAL_SPI_Receive(&hspi1, (uint8_t*)_raw, 2, 100);
-				     *ADdatatemp = 0;
-					 *ADdatatemp |= _raw[0]&0xffff;
-					*ADdatatemp <<= 16;
-					*ADdatatemp |= (_raw[1]) & 0xffff;
-					*ADdatatemp /= 1L << 12;
-	return 0;	
+	HAL_SPI_Receive(&hspi1, (uint8_t *)_raw, 2, 100);
+	*ADdatatemp = 0;
+	*ADdatatemp |= _raw[0] & 0xffff;
+	*ADdatatemp <<= 16;
+	*ADdatatemp |= (_raw[1]) & 0xffff;
+	*ADdatatemp /= 1L << 12;
+	return 0;
 }
-
 
 /*****************************************************************************
 函数名称：void OffsetAD()
@@ -92,38 +88,38 @@ uint8_t  ReadAD(int32_t * ADdatatemp)
 ******************************************************************************/
 void OffsetAD()
 {
-//	HAL_SPI_Transmit(&hspi2, (uint8_t *) 0, 1, 100);
-	uint16_t Timeout= 5000;
+	//	HAL_SPI_Transmit(&hspi2, (uint8_t *) 0, 1, 100);
+	uint16_t Timeout = 5000;
 	uint32_t tickstart = 0U;
 	tickstart = HAL_GetTick();
 	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14))
 	{
 		/* Timeout management */
-		if ((Timeout == 0U) || ((Timeout != HAL_MAX_DELAY) && ((HAL_GetTick() - tickstart) >=  Timeout)))
+		if ((Timeout == 0U) || ((Timeout != HAL_MAX_DELAY) && ((HAL_GetTick() - tickstart) >= Timeout)))
 		{
 			printf("adctimout\n");
 			break;
 		}
 		osDelay(1);
 	}
-	HAL_SPI_Transmit(&hspi1, (uint8_t *) 0, 2, 100);
+	HAL_SPI_Transmit(&hspi1, (uint8_t *)0, 2, 100);
 	osDelay(50);
 	ReadAD(&offset);
 	ReadAD(&offset);
-	if (offset>1000)
+	if (offset > 1000)
 	{
 		offset = 0;
 	}
-	printf("offset:%d\n", offset);
+	//printf("offset:%d\n", offset);
 }
 void wakeUp()
 {
-	HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET); 
+	HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET);
 }
 
 void powerDown()
 {
-	HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET); 
+	HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET);
 }
 
 /*****************************************************************************
@@ -136,7 +132,7 @@ void powerDown()
 void InitADgpio(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
-	
+
 	GPIO_InitStruct.Pin = GPIO_PIN_10;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -148,17 +144,16 @@ void InitADgpio(void)
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-	
 }
 void InitADline(void)
 {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             powerDown();
-//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, GPIO_PIN_RESET);  
+	powerDown();
+	//	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, GPIO_PIN_RESET);
 	osDelay(100);
 	wakeUp();
-	
+
 	osDelay(50);
 	OffsetAD();
 	osDelay(100);
-    //启动转换
+	//启动转换
 }

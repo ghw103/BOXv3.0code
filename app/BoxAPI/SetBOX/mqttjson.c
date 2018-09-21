@@ -34,56 +34,48 @@
  *
  ******************************************************************************
  */
- 
- 
+
 #include "mqttjson.h"
 #include "cjson.h"
 
-
-
-
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void login(STDATETIME time)
 {
-			//	STDATETIME time;
-	    	uint8_t time_buf[20];
-	        cJSON * usr;
-          cJSON *arry;
-					cJSON *root,*js_body;
-//	
-	
-			  sprintf((char *)time_buf,
-				  "%04d%02d%02d%02d%02d%02d",
-				  time.year + 2000,
-				  time.month,
-				  time.day,
-				  time.hour,
-				  time.minute,
-				  time.second);
-		//
-		//	  printf("%s\n", time_buf);
+	//	STDATETIME time;
+	uint8_t time_buf[20];
+	cJSON *usr;
+	cJSON *arry;
+	cJSON *root, *js_body;
+	//
 
- 
-        root=cJSON_CreateObject();   //´´½¨¸ùÊý¾Ý¶ÔÏó
-        cJSON_AddStringToObject(root,"type","BOX");  //¼ÓÈë¼üÖµ£¬¼Ó×Ö·û´®
-        cJSON_AddStringToObject(root,"time",(char *)time_buf );
-				    cJSON_AddItemToObject(root, "machineInfo", usr=cJSON_CreateObject());	
-				cJSON_AddStringToObject(usr,"machineId","0001");  //¼ÓÈë¼üÖµ£¬¼Ó×Ö·û´®
-        cJSON_AddStringToObject(usr,"topic","test");
-				// cJSON_AddItemToObject(root,"body", js_body = cJSON_CreateArray());
-     //   cJSON_AddNumberToObject(usr,"num",1);  //¼ÓÕûÊý
-        
-        char *out = cJSON_Print(root);   //½«jsonÐÎÊ½´òÓ¡³ÉÕý³£×Ö·û´®ÐÎÊ½
-        printf("%s\n",out);
-       
-        // ÊÍ·ÅÄÚ´æ  
-        cJSON_Delete(root);  
-		
-        free(out); 
+	sprintf((char *)time_buf,
+			"%04d%02d%02d%02d%02d%02d",
+			time.year + 2000,
+			time.month,
+			time.day,
+			time.hour,
+			time.minute,
+			time.second);
+	//
+	//	  printf("%s\n", time_buf);
+
+	root = cJSON_CreateObject();				  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¶ï¿½ï¿½ï¿½
+	cJSON_AddStringToObject(root, "type", "BOX"); //ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+	cJSON_AddStringToObject(root, "time", (char *)time_buf);
+	cJSON_AddItemToObject(root, "machineInfo", usr = cJSON_CreateObject());
+	cJSON_AddStringToObject(usr, "machineId", "0001"); //ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+	cJSON_AddStringToObject(usr, "topic", "test");
+	// cJSON_AddItemToObject(root,"body", js_body = cJSON_CreateArray());
+	//   cJSON_AddNumberToObject(usr,"num",1);  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+	char *out = cJSON_Print(root); //ï¿½ï¿½jsonï¿½ï¿½Ê½ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
+	printf("%s\n", out);
+
+	// ï¿½Í·ï¿½ï¿½Ú´ï¿½
+	cJSON_Delete(root);
+
+	free(out);
 }
-
-
-

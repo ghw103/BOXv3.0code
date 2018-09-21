@@ -53,15 +53,14 @@
 /* External variables --------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/
-#define BUFFERSIZE     ((uint16_t)1*8192)  
+#define BUFFERSIZE ((uint16_t)1 * 8192)
 /* Private macros ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
-uint8_t RAMBuf[BUFFERSIZE] = { 0x00 };
+uint8_t RAMBuf[BUFFERSIZE] = {0x00};
 
-#define FLASH_SIZE                         ((uint32_t)0x20000)  /* 128 KBytes */
-#define IAP_SIZE                           ((uint32_t)0x8000)   /* 32Kbytes as IAP size */
-
+#define FLASH_SIZE ((uint32_t)0x20000) /* 128 KBytes */
+#define IAP_SIZE ((uint32_t)0x8000)	/* 32Kbytes as IAP size */
 
 static uint32_t LastPGAddress = APPLICATION_ADDRESS;
 /* Private function prototypes -----------------------------------------------*/
@@ -72,7 +71,8 @@ static uint32_t LastPGAddress = APPLICATION_ADDRESS;
  * @param  None
  * @retval None
  */
-void COMMAND_UPLOAD(void) {
+void COMMAND_UPLOAD(void)
+{
 	__IO uint32_t address = FLASH_BASE;
 	__IO uint32_t counter_read = 0x00;
 	uint32_t tmp_counter = 0x00, index_offset = 0x00;
@@ -81,20 +81,24 @@ void COMMAND_UPLOAD(void) {
 	index_offset = 0x00;
 
 	/* Read flash memory */
-	while (index_offset != FLASH_SIZE) {
-		for (counter_read = 0; counter_read < BUFFERSIZE; counter_read++) {
+	while (index_offset != FLASH_SIZE)
+	{
+		for (counter_read = 0; counter_read < BUFFERSIZE; counter_read++)
+		{
 			/* Check the read bytes versus the end of flash */
-			if (index_offset + counter_read != FLASH_SIZE) {
+			if (index_offset + counter_read != FLASH_SIZE)
+			{
 				tmp_counter = counter_read;
-				RAMBuf[tmp_counter] = (*(uint8_t*) (address++));
+				RAMBuf[tmp_counter] = (*(uint8_t *)(address++));
 			}
 			/* In this case all flash was read */
-			else {
+			else
+			{
 				break;
 			}
 		}
 		/* Write buffer to file */
-		f_write(&USERFile, RAMBuf, counter_read, (UINT*) &tmp_counter);
+		f_write(&USERFile, RAMBuf, counter_read, (UINT *)&tmp_counter);
 		/* Number of bytes written  */
 		index_offset = index_offset + counter_read;
 	}
@@ -107,19 +111,22 @@ void COMMAND_UPLOAD(void) {
  * @param  None
  * @retval None
  */
-uint32_t COMMAND_DOWNLOAD(void) {
+uint32_t COMMAND_DOWNLOAD(void)
+{
 
-	
-	FILINFO finfno = { 0 };
+	FILINFO finfno = {0};
 
-	if (f_stat(DownloadFile, &finfno) != FR_OK) {
+	if (f_stat(DownloadFile, &finfno) != FR_OK)
+	{
 		/* 'STM32.TXT' file Open for write Error */
 		return DOWNLOAD_FILE_FAIL;
 	}
 
-	if (finfno.fsize < (FLASH_SIZE - IAP_SIZE)) {
+	if (finfno.fsize < (FLASH_SIZE - IAP_SIZE))
+	{
 		/* Erase necessary page to download image */
-		if (FLASH_If_Erase(APPLICATION_ADDRESS) != 0) {
+		if (FLASH_If_Erase(APPLICATION_ADDRESS) != 0)
+		{
 			return DOWNLOAD_ERASE_FAIL;
 		}
 
@@ -134,7 +141,8 @@ uint32_t COMMAND_DOWNLOAD(void) {
  * @param  None
  * @retval None
  */
-void COMMAND_JUMP(void) {
+void COMMAND_JUMP(void)
+{
 	/* Software reset */
 	NVIC_SystemReset();
 }
@@ -146,7 +154,8 @@ void COMMAND_JUMP(void) {
  * @retval DOWNLOAD_FILE_FAIL: not possible to read from opend file
  * @retval DOWNLOAD_WRITE_FAIL: not possible to write to FLASH
  */
-uint32_t COMMAND_ProgramFlashMemory(void) {
+uint32_t COMMAND_ProgramFlashMemory(void)
+{
 	__IO uint32_t read_size = 0x00, tmp_read_size = 0x00;
 	uint32_t read_flag = TRUE;
 
@@ -154,11 +163,12 @@ uint32_t COMMAND_ProgramFlashMemory(void) {
 	LastPGAddress = APPLICATION_ADDRESS;
 
 	/* While file still contain data */
-	while (read_flag == TRUE) {
+	while (read_flag == TRUE)
+	{
 
 		/* Read maximum "BUFFERSIZE" Kbyte from the selected file  */
-		if (f_read(&USERFile, RAMBuf, BUFFERSIZE, (UINT*) &read_size)
-				!= FR_OK) {
+		if (f_read(&USERFile, RAMBuf, BUFFERSIZE, (UINT *)&read_size) != FR_OK)
+		{
 			return DOWNLOAD_FILE_FAIL;
 		}
 
@@ -166,13 +176,14 @@ uint32_t COMMAND_ProgramFlashMemory(void) {
 		tmp_read_size = read_size;
 
 		/* The read data < "BUFFERSIZE" Kbyte */
-		if (tmp_read_size < BUFFERSIZE) {
+		if (tmp_read_size < BUFFERSIZE)
+		{
 			read_flag = FALSE;
 		}
 
 		/* Program flash memory */
-		if (FLASH_If_Write(LastPGAddress, (uint32_t*) RAMBuf, read_size)
-				!= FLASHIF_OK) {
+		if (FLASH_If_Write(LastPGAddress, (uint32_t *)RAMBuf, read_size) != FLASHIF_OK)
+		{
 			return DOWNLOAD_WRITE_FAIL;
 		}
 

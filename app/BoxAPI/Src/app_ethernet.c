@@ -50,14 +50,14 @@
 #include "lwip.h"
 #include "lwip/init.h"
 #include "lwip/netif.h"
-#if defined ( __CC_ARM )  /* MDK ARM Compiler */
+#if defined(__CC_ARM) /* MDK ARM Compiler */
 #include "lwip/sio.h"
 #endif /* MDK ARM Compiler */
 #include "ethernetif.h"
 #include "app_ethernet.h"
 
 #include "string.h"
-#include <stdlib.h>   /* atoi() */
+#include <stdlib.h> /* atoi() */
 #include <stdbool.h>
 
 /* Private typedef -----------------------------------------------------------*/
@@ -67,12 +67,12 @@
 uint8_t IP_ADDRESS[4];
 uint8_t NETMASK_ADDRESS[4];
 uint8_t GATEWAY_ADDRESS[4];
-uint8_t dhcp_flage= 0;
-extern	 osSemaphoreId Netif_LinkSemaphore ;
+uint8_t dhcp_flage = 0;
+extern osSemaphoreId Netif_LinkSemaphore;
 
 /* Private variables ---------------------------------------------------------*/
 #ifdef USE_DHCP
-#define MAX_DHCP_TRIES  4
+#define MAX_DHCP_TRIES 4
 __IO uint8_t DHCP_state = DHCP_OFF;
 #endif
 
@@ -85,26 +85,25 @@ __IO uint8_t DHCP_state = DHCP_OFF;
   */
 void Netif_Config(void)
 {
-	ip_addr_t ipaddr;
-	ip_addr_t netmask;
-	ip_addr_t gw;
-	if (dhcp_flage)
-	{
-		ip_addr_set_zero_ip4(&ipaddr);
-		ip_addr_set_zero_ip4(&netmask);
-		ip_addr_set_zero_ip4(&gw);
-	}
-	else
-	{
-		/* IP addresses initialization without DHCP (IPv4) */
-		IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
-		IP4_ADDR(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
-		IP4_ADDR(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
-		/* USE_DHCP */
-	}
+  ip_addr_t ipaddr;
+  ip_addr_t netmask;
+  ip_addr_t gw;
+  if (dhcp_flage)
+  {
+    ip_addr_set_zero_ip4(&ipaddr);
+    ip_addr_set_zero_ip4(&netmask);
+    ip_addr_set_zero_ip4(&gw);
+  }
+  else
+  {
+    /* IP addresses initialization without DHCP (IPv4) */
+    IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
+    IP4_ADDR(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
+    IP4_ADDR(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
+    /* USE_DHCP */
+  }
 
-  
-	/* - netif_add(struct netif *netif, struct ip_addr *ipaddr,
+  /* - netif_add(struct netif *netif, struct ip_addr *ipaddr,
 	struct ip_addr *netmask, struct ip_addr *gw,
 	void *state, err_t (* init)(struct netif *netif),
 	err_t (* input)(struct pbuf *p, struct netif *netif))
@@ -116,88 +115,88 @@ void Netif_Config(void)
   
 	The init function pointer must point to a initialization function for
 	your ethernet netif interface. The following code illustrates it's use.*/
-  
-	netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, &ethernetif_init, &tcpip_input);
-  
-	/*  Registers the default network interface. */
-	netif_set_default(&gnetif);
-  
-	if (netif_is_link_up(&gnetif))
-	{
-		/* When the netif is fully configured this function must be called.*/
-		netif_set_up(&gnetif);
-	}
-	else
-	{
-		/* When the netif link is down this function must be called */
-		netif_set_down(&gnetif);
-	}
 
-	/* Set the link callback function, this function is called on change of link status*/
-	netif_set_link_callback(&gnetif, ethernetif_update_config);
-  
-	/* create a binary semaphore used for informing ethernetif of frame reception */
-	osSemaphoreDef(Netif_SEM);
-	Netif_LinkSemaphore = osSemaphoreCreate(osSemaphore(Netif_SEM), 1);
-  
-	link_arg.netif = &gnetif;
-	link_arg.semaphore = Netif_LinkSemaphore;
-	/* Create the Ethernet link handler thread */
+  netif_add(&gnetif, &ipaddr, &netmask, &gw, NULL, &ethernetif_init, &tcpip_input);
+
+  /*  Registers the default network interface. */
+  netif_set_default(&gnetif);
+
+  if (netif_is_link_up(&gnetif))
+  {
+    /* When the netif is fully configured this function must be called.*/
+    netif_set_up(&gnetif);
+  }
+  else
+  {
+    /* When the netif link is down this function must be called */
+    netif_set_down(&gnetif);
+  }
+
+  /* Set the link callback function, this function is called on change of link status*/
+  netif_set_link_callback(&gnetif, ethernetif_update_config);
+
+  /* create a binary semaphore used for informing ethernetif of frame reception */
+  osSemaphoreDef(Netif_SEM);
+  Netif_LinkSemaphore = osSemaphoreCreate(osSemaphore(Netif_SEM), 1);
+
+  link_arg.netif = &gnetif;
+  link_arg.semaphore = Netif_LinkSemaphore;
+  /* Create the Ethernet link handler thread */
 #if defined(__GNUC__)
-	osThreadDef(LinkThr, ethernetif_set_link, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 5);
+  osThreadDef(LinkThr, ethernetif_set_link, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 5);
 #else
-	osThreadDef(LinkThr, ethernetif_set_link, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 2);
+  osThreadDef(LinkThr, ethernetif_set_link, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 2);
 #endif
-	osThreadCreate(osThread(LinkThr), &link_arg);
+  osThreadCreate(osThread(LinkThr), &link_arg);
 }
 /**
   * @brief  Notify the User about the nework interface config status 
   * @param  netif: the network interface
   * @retval None
   */
-void User_notification(struct netif *netif) 
+void User_notification(struct netif *netif)
 {
   if (netif_is_up(netif))
- {
-	 if (dhcp_flage)
-	 {
-		 DHCP_state = DHCP_START; 
-	 }
+  {
+    if (dhcp_flage)
+    {
+      DHCP_state = DHCP_START;
+    }
     /* Update DHCP state machine */
-  
-	 else
-	 {
-		#ifdef USE_LCD
-			uint8_t iptxt[20];
-			sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
-		 printf("Static IP address: %s\n", iptxt);
-		 sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->netmask));
-			printf ("Static net address: %s\n", iptxt);
-		 sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->gw));
-		 printf("Static net address: %s\n", iptxt);
-		
-		#else    
-			/* Turn On LED 1 to indicate ETH and LwIP init success*/
-			BSP_LED_On(LED1);
-		#endif /* USE_LCD */
-	}
+
+    else
+    {
+#ifdef USE_LCD
+      uint8_t iptxt[20];
+      sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
+      printf("Static IP address: %s\n", iptxt);
+      sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->netmask));
+      printf("Static net address: %s\n", iptxt);
+      sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->gw));
+      printf("Static net address: %s\n", iptxt);
+
+#else
+      /* Turn On LED 1 to indicate ETH and LwIP init success*/
+      BSP_LED_On(LED1);
+#endif /* USE_LCD */
+    }
   }
   else
-  {  
-	  if (dhcp_flage)
-	  {
-		  /* Update DHCP state machine */
-		  DHCP_state = DHCP_LINK_DOWN;
-		  /* USE_DHCP */ 
-	  }
+  {
+    if (dhcp_flage)
+    {
+      /* Update DHCP state machine */
+      DHCP_state = DHCP_LINK_DOWN;
+      /* USE_DHCP */
+    }
 
 #ifdef USE_LCD
-	  printf("The network cable is not connected \n");
-#else    
+    printf("The network cable is not connected \n");
+#else
     /* Turn On LED 2 to indicate ETH and LwIP init error */
     BSP_LED_On(LED2);
 #endif /* USE_LCD */
-  } 
+  }
 }
 
 /**
@@ -207,86 +206,85 @@ void User_notification(struct netif *netif)
   */
 void ethernetif_notify_conn_changed(struct netif *netif)
 {
-//#ifndef USE_DHCP
+  //#ifndef USE_DHCP
 
-		ip_addr_t ipaddr;
-		ip_addr_t netmask;
-		ip_addr_t gw; 
+  ip_addr_t ipaddr;
+  ip_addr_t netmask;
+  ip_addr_t gw;
 
- 
-//#endif
-  
-  if(netif_is_link_up(netif))
+  //#endif
+
+  if (netif_is_link_up(netif))
   {
-#ifdef USE_LCD        
-	  printf("The network cable is now connected \n");
+#ifdef USE_LCD
+    printf("The network cable is now connected \n");
 #else
     BSP_LED_Off(LED2);
     BSP_LED_On(LED1);
 #endif /* USE_LCD */
-    
-//#ifdef USE_DHCP
-	  if(dhcp_flage)
-	  {
-		  /* Update DHCP state machine */
-		  DHCP_state = DHCP_START;
-	  }
-	  else
-	  {
-	
-//#else
 
-	  /* IP addresses initialization without DHCP (IPv4) */
-	  IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
-	  IP4_ADDR(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
-	  IP4_ADDR(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]); 
- 
-    netif_set_addr(netif, &ipaddr , &netmask, &gw);
-    
-#ifdef USE_LCD        
-    uint8_t iptxt[20];
-    sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
-		  printf("Static IP address: %s\n", iptxt);
+    //#ifdef USE_DHCP
+    if (dhcp_flage)
+    {
+      /* Update DHCP state machine */
+      DHCP_state = DHCP_START;
+    }
+    else
+    {
+
+      //#else
+
+      /* IP addresses initialization without DHCP (IPv4) */
+      IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
+      IP4_ADDR(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
+      IP4_ADDR(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
+
+      netif_set_addr(netif, &ipaddr, &netmask, &gw);
+
+#ifdef USE_LCD
+      uint8_t iptxt[20];
+      sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
+      printf("Static IP address: %s\n", iptxt);
 #endif /* USE_LCD */
-		}
-//#endif /* USE_DHCP */   
-    
+    }
+    //#endif /* USE_DHCP */
+
     /* When the netif is fully configured this function must be called.*/
-    netif_set_up(netif);     
+    netif_set_up(netif);
   }
   else
   {
-//#ifdef USE_DHCP
-	  if(dhcp_flage)
-	  {
-		  /* Update DHCP state machine */
-		  DHCP_state = DHCP_LINK_DOWN;
-	  }
-//#endif /* USE_DHCP */
-    
+    //#ifdef USE_DHCP
+    if (dhcp_flage)
+    {
+      /* Update DHCP state machine */
+      DHCP_state = DHCP_LINK_DOWN;
+    }
+    //#endif /* USE_DHCP */
+
     /*  When the netif link is down this function must be called.*/
     netif_set_down(netif);
-    
+
 #ifdef USE_LCD
-	  printf("The network cable is not connected \n");
+    printf("The network cable is not connected \n");
 #else
     BSP_LED_Off(LED1);
     BSP_LED_On(LED2);
-#endif /* USE_LCD */    
+#endif /* USE_LCD */
   }
 }
-int net_get_ipaddress(struct netif *netif, uint8_t* ipAddress)
+int net_get_ipaddress(struct netif *netif, uint8_t *ipAddress)
 {
-	memcpy(ipAddress, (const ip4_addr_t *)&netif->ip_addr, 4);
-	memcpy(ipAddress+4, (const ip4_addr_t *)&netif->netmask, 4);
-	memcpy(ipAddress+8, (const ip4_addr_t *)&netif->gw, 4);
-	return 0;
+  memcpy(ipAddress, (const ip4_addr_t *)&netif->ip_addr, 4);
+  memcpy(ipAddress + 4, (const ip4_addr_t *)&netif->netmask, 4);
+  memcpy(ipAddress + 8, (const ip4_addr_t *)&netif->gw, 4);
+  return 0;
 }
 
-int net_get_mac_address(struct netif *netif,uint8_t* macAddress)
+int net_get_mac_address(struct netif *netif, uint8_t *macAddress)
 {
-	memcpy(macAddress, netif->hwaddr, netif->hwaddr_len);
-	return 0;
+  memcpy(macAddress, netif->hwaddr, netif->hwaddr_len);
+  return 0;
 }
 #if defined(USE_DHCP)
 /**
@@ -294,93 +292,94 @@ int net_get_mac_address(struct netif *netif,uint8_t* macAddress)
   * @param  argument: network interface
   * @retval None
   */
-void DHCP_thread(void const * argument)
+void DHCP_thread(void const *argument)
 {
-  struct netif *netif = (struct netif *) argument;
+  struct netif *netif = (struct netif *)argument;
   ip_addr_t ipaddr;
   ip_addr_t netmask;
   ip_addr_t gw;
   struct dhcp *dhcp;
-#ifdef USE_LCD 
+#ifdef USE_LCD
   uint8_t iptxt[20];
 #endif
-  
+
   for (;;)
   {
     switch (DHCP_state)
     {
     case DHCP_START:
-      {
-        ip_addr_set_zero_ip4(&netif->ip_addr);
-        ip_addr_set_zero_ip4(&netif->netmask);
-        ip_addr_set_zero_ip4(&netif->gw);       
-        dhcp_start(netif);
-        DHCP_state = DHCP_WAIT_ADDRESS;
+    {
+      ip_addr_set_zero_ip4(&netif->ip_addr);
+      ip_addr_set_zero_ip4(&netif->netmask);
+      ip_addr_set_zero_ip4(&netif->gw);
+      dhcp_start(netif);
+      DHCP_state = DHCP_WAIT_ADDRESS;
 #ifdef USE_LCD
-	      printf("  State: Looking for DHCP server ...\n");
+      printf("  State: Looking for DHCP server ...\n");
 #endif
-      }
-      break;
-      
+    }
+    break;
+
     case DHCP_WAIT_ADDRESS:
-      {                
-        if (dhcp_supplied_address(netif)) 
-        {
-          DHCP_state = DHCP_ADDRESS_ASSIGNED;	
-         
-#ifdef USE_LCD 
-          sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));   
-	        printf("IP address assigned by a DHCP server: %s\n", iptxt);
+    {
+      if (dhcp_supplied_address(netif))
+      {
+        DHCP_state = DHCP_ADDRESS_ASSIGNED;
+
+#ifdef USE_LCD
+        sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
+        printf("IP address assigned by a DHCP server: %s\n", iptxt);
 #else
-          BSP_LED_On(LED1);   
-#endif 
-        }
-        else
-        {
-          dhcp = (struct dhcp *)netif_get_client_data(netif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP);
-    
-          /* DHCP timeout */
-          if (dhcp->tries > MAX_DHCP_TRIES)
-          {
-            DHCP_state = DHCP_TIMEOUT;
-            
-            /* Stop DHCP */
-            dhcp_stop(netif);
-            
-            /* Static address used */
-//            IP_ADDR4(&ipaddr, IP_ADDR0 ,IP_ADDR1 , IP_ADDR2 , IP_ADDR3 );
-//            IP_ADDR4(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
-//            IP_ADDR4(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
-	            IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
-	          IP4_ADDR(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
-	          IP4_ADDR(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]); 
-            netif_set_addr(netif, ip_2_ip4(&ipaddr), ip_2_ip4(&netmask), ip_2_ip4(&gw));
-            
-#ifdef USE_LCD  
-            sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
-	          printf("DHCP Timeout !! \n");
-	          printf("Static IP address: %s\n", iptxt);  
-#else
-            BSP_LED_On(LED1);  
+        BSP_LED_On(LED1);
 #endif
-          }
+      }
+      else
+      {
+        dhcp = (struct dhcp *)netif_get_client_data(netif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP);
+
+        /* DHCP timeout */
+        if (dhcp->tries > MAX_DHCP_TRIES)
+        {
+          DHCP_state = DHCP_TIMEOUT;
+
+          /* Stop DHCP */
+          dhcp_stop(netif);
+
+          /* Static address used */
+          //            IP_ADDR4(&ipaddr, IP_ADDR0 ,IP_ADDR1 , IP_ADDR2 , IP_ADDR3 );
+          //            IP_ADDR4(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
+          //            IP_ADDR4(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+          IP4_ADDR(&ipaddr, IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
+          IP4_ADDR(&netmask, NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2], NETMASK_ADDRESS[3]);
+          IP4_ADDR(&gw, GATEWAY_ADDRESS[0], GATEWAY_ADDRESS[1], GATEWAY_ADDRESS[2], GATEWAY_ADDRESS[3]);
+          netif_set_addr(netif, ip_2_ip4(&ipaddr), ip_2_ip4(&netmask), ip_2_ip4(&gw));
+
+#ifdef USE_LCD
+          sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
+          printf("DHCP Timeout !! \n");
+          printf("Static IP address: %s\n", iptxt);
+#else
+          BSP_LED_On(LED1);
+#endif
         }
       }
-      break;
-  case DHCP_LINK_DOWN:
+    }
+    break;
+    case DHCP_LINK_DOWN:
     {
       /* Stop DHCP */
       dhcp_stop(netif);
-      DHCP_state = DHCP_OFF; 
+      DHCP_state = DHCP_OFF;
     }
     break;
-    default: break;
+    default:
+      break;
     }
-    
+
     /* wait 250 ms */
     osDelay(250);
   }
 }
-#endif  /* USE_DHCP */
+#endif /* USE_DHCP */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
