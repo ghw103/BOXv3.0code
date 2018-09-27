@@ -246,33 +246,33 @@ void decoding(uint8_t *data, uint8_t *error, uint8_t *lenth)
 
 			break;
 		case setip1:
-			IP_ADDRESS[0] = data[5];
-			IP_ADDRESS[1] = data[4];
+			//IP_ADDRESS[0] = data[5];
+		//	IP_ADDRESS[1] = data[4];
 
 			break;
 		case setip2:
-			IP_ADDRESS[2] = data[5];
-			IP_ADDRESS[3] = data[4];
+			//IP_ADDRESS[2] = data[5];
+			//IP_ADDRESS[3] = data[4];
 
 			break;
 		case setip3:
-			GATEWAY_ADDRESS[0] = data[5];
-			GATEWAY_ADDRESS[1] = data[4];
+			//GATEWAY_ADDRESS[0] = data[5];
+			//GATEWAY_ADDRESS[1] = data[4];
 
 			break;
 		case setip4:
-			GATEWAY_ADDRESS[2] = data[5];
-			GATEWAY_ADDRESS[3] = data[4];
+			//GATEWAY_ADDRESS[2] = data[5];
+			//GATEWAY_ADDRESS[3] = data[4];
 
 			break;
 		case setip5:
-			NETMASK_ADDRESS[0] = data[5];
-			NETMASK_ADDRESS[1] = data[4];
+			//NETMASK_ADDRESS[0] = data[5];
+			//NETMASK_ADDRESS[1] = data[4];
 
 			break;
 		case setip6:
-			NETMASK_ADDRESS[2] = data[5];
-			NETMASK_ADDRESS[3] = data[4];
+			//NETMASK_ADDRESS[2] = data[5];
+			//NETMASK_ADDRESS[3] = data[4];
 
 			break;
 
@@ -285,7 +285,7 @@ void decoding(uint8_t *data, uint8_t *error, uint8_t *lenth)
 	{
 		if (data[3] == 0x02)
 		{
-			for (uint8_t i = 0; i < 4; i++)
+			/*for (uint8_t i = 0; i < 4; i++)
 			{
 				printf("ip:%d\n", IP_ADDRESS[i]);
 			}
@@ -293,11 +293,11 @@ void decoding(uint8_t *data, uint8_t *error, uint8_t *lenth)
 			{
 				printf("%d\n", GATEWAY_ADDRESS[i]);
 			}
-			setip_flage = 1;
-			I2C_EEPROM_WriteBuffer(EE_ipaddr, IP_ADDRESS, 4);
-			I2C_EEPROM_WriteBuffer(EE_ipaddr + 4, GATEWAY_ADDRESS, 4);
-			I2C_EEPROM_WriteBuffer(EE_ipaddr + 8, NETMASK_ADDRESS, 4);
-			I2C_EEPROM_WriteBuffer(EE_setipflageaddr, &setip_flage, 1);
+			setip_flage = 1;*/
+		///*	I2C_EEPROM_WriteBuffer(EE_ipaddr, IP_ADDRESS, 4);
+		//	I2C_EEPROM_WriteBuffer(EE_ipaddr + 4, GATEWAY_ADDRESS, 4);
+		//	I2C_EEPROM_WriteBuffer(EE_ipaddr + 8, NETMASK_ADDRESS, 4);
+		//	I2C_EEPROM_WriteBuffer(EE_setipflageaddr, &setip_flage, 1);
 		}
 		else if (data[3] == 0x03)
 		{

@@ -68,5 +68,6 @@ extern "C"
   void loaduser(uint8_t *parameter);
   void loadtime(uint8_t *parameter);
   void saveparmqttbuf(uint8_t *parameter);
-
+  uint8_t B3_eeread(uint8_t *pBuffer, uint16_t ReadAddr, uint16_t NumByteToRead);
+  uint8_t B3_eewrite(uint8_t *pBuffer, uint16_t ReadAddr, uint16_t NumByteToWrite);
 #endif /* __BOXAPI_H */

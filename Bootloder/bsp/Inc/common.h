@@ -1,8 +1,8 @@
-﻿#ifndef __COMMMOCN_H
+#ifndef __COMMMOCN_H
 #define __COMMMOCN_H
 
 #include "stm32f4xx_hal.h"
-#include "cmsis_os.h"
+//#include "cmsis_os.h"
 
 
 #ifdef __cplusplus
@@ -11,8 +11,8 @@
 
 //typedef struct Network Network;
 
-extern osMessageQId recvQueueHandle;
-	extern osSemaphoreId TIMEBinarySemHandle;
+//extern osMessageQId recvQueueHandle;
+//	extern osSemaphoreId TIMEBinarySemHandle;
 //extern osMessageQId MBQueueHandle;
 		__IO uint32_t usTick; 
 	 
@@ -71,12 +71,12 @@ extern	 uint8_t aRxBuffer[32];
 	 
 extern	 struct netif gnetif;
 	 
-	 void bsp_init(void);
-	 void EEinit(void); 
-	 
-	 void User_UART_IRQHandler(UART_HandleTypeDef *huart);	 
-	 uint32_t user_GetTick(void);
-	 void user_Tick(void);
+	 //void bsp_init(void);
+	 //void EEinit(void); 
+	 //
+	 //void User_UART_IRQHandler(UART_HandleTypeDef *huart);	 
+	 //uint32_t user_GetTick(void);
+	 //void user_Tick(void);
 	
 	 
 #endif

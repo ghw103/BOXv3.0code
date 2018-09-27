@@ -139,7 +139,6 @@ struct netconn *newconnbuff[cleinlent];
 uint8_t mqttstatus = 0;
 int B3socket_read(int sock, unsigned char *buffer, int len, int timeout_ms);
 /* USER CODE END FunctionPrototypes */
-
 /* Hook prototypes */
 
 /* Init FreeRTOS */
@@ -256,7 +255,8 @@ void MX_FREERTOS_Init(void)
 
 	/* USER CODE END RTOS_QUEUES */
 }
-
+//uint8_t Write_test[256] = "45678654423456;kp[i[piopioputorwutiwutiueoiutiom,l3443u590387095782095902750729435 ";
+//uint8_t Read_test[256] = {0};
 /* StartDefaultTask function */
 void StartDefaultTask(void const *argument)
 {
@@ -264,6 +264,10 @@ void StartDefaultTask(void const *argument)
 	MX_FATFS_Init();
 
 	/* USER CODE BEGIN StartDefaultTask */
+	//I2C_EEPROM_WriteBuffer((512 + 496), (uint8_t *)Write_test, 100);
+	//I2C_EEPROM_ReadBuffer((512 + 496), (uint8_t *)Read_test, 100);
+	//printf((char *)Read_test);
+	//printf("\r\n");
 	loadDHCPset(&dhcp_flage);
 	loadipar(NULL, NULL, NULL);
 	//dhcp_flage = 1;

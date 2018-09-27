@@ -1,4 +1,4 @@
-﻿/**
+/**
   ******************************************************************************
   * @file           : cat1023.h
   * @brief          : 
@@ -26,28 +26,31 @@
 #define __CAT1023_H__
 
 #ifdef __cplusplus
- extern "C" {
-#endif	
-	 
-	 /* Includes ------------------------------------------------------------------*/
-//#include "common.h"
+extern "C"
+{
+#endif
+
+  /* Includes ------------------------------------------------------------------*/
+#include "common.h"
 #include "stm32f4xx_hal.h"
 
 /* Private define ------------------------------------------------------------*/
-#define        CAT1023_ADDR_READ    0xA1
+#define CAT1023_ADDR_READ 0xA1
 
-#define        CAT1023_ADDR_WRITE   0xA0
+#define CAT1023_ADDR_WRITE 0xA0
 
-/* ########################## Assert Selection ############################## */
-	 uint8_t I2C_EEPROM_WriteBuffer( uint16_t Reg, uint8_t *pBuffer, uint16_t Length);
-	 
-	 
-		 
-	uint8_t I2C_EEPROM_ReadBuffer( uint16_t Reg, uint8_t *pBuffer, uint16_t Length);	
-	 
-	 
-		 
-#endif	
-		 
-		 
-		 
+#define EEPROM_PAGESIZE 16 /* RF EEPROM used */
+/* Maximum Timeout values for flags waiting loops. These timeouts are not based
+   on accurate values, they just guarantee that the application will not remain
+   stuck if the I2C communication is corrupted.
+   You may modify these timeout values depending on CPU frequency and application
+   conditions (interrupts routines ...). */
+#define I2Cx_TIMEOUT_MAX 300
+/* Maximum number of trials for HAL_I2C_IsDeviceReady() function */
+#define EEPROM_MAX_TRIALS 300
+  /* ########################## Assert Selection ############################## */
+  uint8_t I2C_EEPROM_WriteBuffer(uint16_t Memory_Address, uint8_t *pBuffer, uint16_t Length);
+
+  uint8_t I2C_EEPROM_ReadBuffer(uint16_t Memory_Address, uint8_t *pBuffer, uint16_t Length);
+
+#endif

@@ -1,4 +1,4 @@
-﻿/**
+/**
   ******************************************************************************
   * File Name          : 
   * Description        : This file provides code for the configuration
@@ -55,7 +55,8 @@
 #include "command.h"
 #include "string.h"
 #include "usart.h"
-
+#include "cat1023.h"
+#include "i2c.h"
 pFunction   JumpToApplication;
 uint32_t    JumpAddress;
 
@@ -68,8 +69,8 @@ uint8_t  contackAck[] = { 0x5A, 0XA5, 0x55, 0xAA, 0x00, 0xFF };
 uint8_t sendDatPackReq[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x01, 0xFE };
 uint8_t sendDatPackAck[] = { 0xAA, 0X55, 0xA5, 0x5A, 0x02, 0xFD };
 uint8_t revDataOk[] = { 0xAA, 0X55, 0xA5, 0x5A, 0xA0, 0x5F };
-
-#define recv_data_size   10368
+#define binFileLenaddr 496
+#define recv_data_size   1048
 uint8_t     recv_data[recv_data_size];
 int    recv_datalen = 0;
 uint32_t  revPackNum = 0, revPacklenth;
@@ -83,8 +84,9 @@ const char UploadFile[] = "F0upload.bin";
 UINT fnum; /* 文件成功读写数量 */
 BYTE ReadBuffer[1024] = { 0 }; /* 读缓冲区 */
 BYTE WriteBuffer[] = "14424242424今天是个好日子，新建文件系统测试文件\n"; /* 写缓冲区*/  
-
+FILINFO finfno = { 0 };
 uint8_t workBuffer[_MAX_SS];
+uint8_t eeRead[16];
 /*****************************************************************************************/
 void fatfstest(void)
 {
@@ -120,6 +122,7 @@ void fatfstest(void)
 
 void main_iap(void)
 {
+
 	/* Test if any sector of Flash memory where user application will be loaded is write protected */
 	FlashProtection = FLASH_If_GetWriteProtectionStatus();
 	if ((FlashProtection & FLASHIF_PROTECTION_WRPENABLED) != 0)
@@ -146,6 +149,22 @@ void main_iap(void)
 		}
 		else
 		{
+			MX_I2C3_Init();
+			HAL_Delay(100);
+			I2C_EEPROM_ReadBuffer((512+ binFileLenaddr),(uint8_t*)eeRead,4);
+			binFileLen = eeRead[0] << 24 | eeRead[1] << 16 | eeRead[2] << 8 | eeRead[3];
+			if (f_stat(DownloadFile, &finfno) != FR_OK)
+			{
+				break;
+			}
+			if ((finfno.fsize) != binFileLen)
+			{
+				f_close(&USERFile);
+				f_unlink(DownloadFile);
+				__set_FAULTMASK(1);
+				HAL_NVIC_SystemReset();
+				break;
+			}
 			printf(" Download ongoing         \n");
 			if (COMMAND_DOWNLOAD() != DOWNLOAD_OK)
 			{

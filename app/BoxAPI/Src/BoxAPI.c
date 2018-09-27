@@ -9,6 +9,7 @@
 #include "recod.h"
 //#include "DAC.h"
 #include "R8025t.h"
+#include "cat1023.h"
 //#include "lwip.h"
 //#include "lwip/init.h"
 //#include "lwip/netif.h"
@@ -31,6 +32,15 @@
 uint8_t B3Macaddr[6] = {0};
 #define parparameteraddr 0;
 
+uint8_t B3_eeread(uint8_t *pBuffer, uint16_t ReadAddr, uint16_t NumByteToRead)
+{
+	return I2C_EEPROM_ReadBuffer( (ReadAddr+512), (uint8_t *)pBuffer,  NumByteToRead);//前面的512字节被使用
+}
+uint8_t B3_eewrite(uint8_t *pBuffer, uint16_t ReadAddr, uint16_t NumByteToWrite)
+{
+	return I2C_EEPROM_WriteBuffer( (ReadAddr+512), (uint8_t *)pBuffer,  NumByteToWrite);
+}
+
 uint32_t user_CRC(uint8_t *pBuff, uint32_t len)
 {
 	uint32_t i;
@@ -48,9 +58,9 @@ uint32_t user_CRC(uint8_t *pBuff, uint32_t len)
 
 void restory()
 {
-	uint8_t clean[300] = {0};
+	uint8_t clean[512] = {0};
 	//  taskENTER_CRITICAL();    //or portENTER_CRITICAL();
-	W25QXX_Write((uint8_t *)clean, 0, 300);
+	W25QXX_Write((uint8_t *)clean, 0, 512);
 	//taskEXIT_CRITICAL();      //or portEXIT_CRITICAL();
 	__set_FAULTMASK(1);
 	HAL_NVIC_SystemReset();

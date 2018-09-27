@@ -82,7 +82,7 @@ uint8_t I2C_EEPROM_WriteBuffer(uint16_t WriteAddr, uint8_t *pBuffer, uint16_t Le
 
  uint8_t I2C_EEPROM_ReadBuffer(uint16_t Memory_Address, uint8_t *pBuffer, uint16_t Length)
 {
-	if (HAL_I2C_Mem_Read_DMA(&hi2c3, (uint16_t)CAT1023_ADDR_READ, Memory_Address, I2C_MEMADD_SIZE_16BIT, (uint8_t *)pBuffer, Length) != HAL_OK)
+	if (HAL_I2C_Mem_Read_DMA(&hi2c3, (uint16_t)CAT1023_ADDR_READ, Memory_Address, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pBuffer, Length) != HAL_OK)
 	{
 		/* Reading process Error */
 		//Error_Handler();

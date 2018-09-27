@@ -48,7 +48,7 @@
     <AllDependencies>
       <ProjectDependency>
         <RelativePath>..\..\bootloader.gpdsc</RelativePath>
-        <Timestamp>131813894456721564</Timestamp>
+        <Timestamp>131824876101661663</Timestamp>
       </ProjectDependency>
     </AllDependencies>
     <RootDirectory>
@@ -382,12 +382,12 @@
       <ImportedConfiguration>
         <Settings>
           <IncludeDirectories>
-            <string>D:\BOXv3.0code\Bootloder\Inc</string>
-            <string>D:\BOXv3.0code\Bootloder\Drivers\CMSIS\Include</string>
-            <string>D:\BOXv3.0code\Bootloder\Drivers\CMSIS\Device\ST\STM32F4xx\Include</string>
-            <string>D:\BOXv3.0code\Bootloder\Drivers\STM32F4xx_HAL_Driver\Inc</string>
-            <string>D:\BOXv3.0code\Bootloder\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy</string>
-            <string>D:\BOXv3.0code\Bootloder\Middlewares\Third_Party\FatFs\src</string>
+            <string>D:\WorkPrj\BOXv3.0code\Bootloder\Inc</string>
+            <string>D:\WorkPrj\BOXv3.0code\Bootloder\Drivers\CMSIS\Include</string>
+            <string>D:\WorkPrj\BOXv3.0code\Bootloder\Drivers\CMSIS\Device\ST\STM32F4xx\Include</string>
+            <string>D:\WorkPrj\BOXv3.0code\Bootloder\Drivers\STM32F4xx_HAL_Driver\Inc</string>
+            <string>D:\WorkPrj\BOXv3.0code\Bootloder\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy</string>
+            <string>D:\WorkPrj\BOXv3.0code\Bootloder\Middlewares\Third_Party\FatFs\src</string>
           </IncludeDirectories>
           <PreprocessorMacros>
             <string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>

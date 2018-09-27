@@ -35,14 +35,14 @@ extern RS485_MSG_T rs485_MSG;
 
 #define PORT 8088
 
-#define EE_ipaddr 0
+//#define EE_ipaddr 0
 
-#define EE_timeaddr 20
+#define EE_timeaddr 0
 
 #define EE_timeflageaddr 80
 
 #define EE_modeflageaddr 110
-#define EE_setipflageaddr 120
+//#define EE_setipflageaddr 120
 	typedef enum
 	{
 		DO1 = 1,
@@ -73,7 +73,7 @@ extern RS485_MSG_T rs485_MSG;
 	//extern struct link_str link_arg;
 
 	//extern	 uint8_t aRxBuffer[32];
-	extern uint8_t setip_flage;
+	//extern uint8_t setip_flage;
 
 	//extern	 struct netif gnetif;
 

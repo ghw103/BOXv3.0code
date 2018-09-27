@@ -54,8 +54,10 @@
 #include "flash_if.h"
 #include "command.h"
 #include <string.h>
-
+#include "BoxAPI.h"
 #include "w25qxx.h"
+#include "cat1023.h"
+
 pFunction JumpToApplication;
 uint32_t JumpAddress;
 
@@ -70,7 +72,7 @@ uint32_t volatile FlashProtection = 0;
 //uint8_t revDataOk[] = { 0xAA, 0X55, 0xA5, 0x5A, 0xA0, 0x5F };
 
 #define recv_data_size 1128
-
+#define binFileLenaddr 496
 /*****************************************************************************************/
 const char DownloadFile[] = "box.bin";
 const char UploadFile[] = "F0upload.bin";
@@ -303,6 +305,8 @@ int8_t IAP_upgread(int socket)
 	uint8_t sendfilenum[4] = {0};
 	uint8_t revallfile[] = {0x72, 0x63, 0x76, 0x61, 0x6c, 0x6c};
 
+	uint8_t eeRead[16] = {0};
+
 	uint8_t recv_data[recv_data_size];
 	int recv_datalen = 0;
 	uint32_t revPackNum = 0, revPacklenth;
@@ -346,6 +350,7 @@ int8_t IAP_upgread(int socket)
 			///*/*/*/*/*	stm32_version = *(uint32_t *)(recv_data);*/*/*/*/*/
 			stm32_version = recv_data[0] << 24 | recv_data[1] << 16 | recv_data[2] << 8 | recv_data[3];
 			printf("stm32_version:%d\n", stm32_version);
+			B3_eewrite((uint8_t *)(recv_data+10), binFileLenaddr,4);
 			binFileLen = recv_data[10] << 24 | recv_data[11] << 16 | recv_data[12] << 8 | recv_data[13];
 			printf("binlen:%d\n", binFileLen);
 			recv_datalen = 0;
@@ -447,8 +452,7 @@ int8_t IAP_upgread(int socket)
 			dog();
 			if (f_stat(DownloadFile, &finfno) != FR_OK)
 			{
-				/* 'STM32.TXT' file Open for write Error */
-				//return DOWNLOAD_FILE_FAIL;
+				
 			}
 			if ((finfno.fsize) != binFileLen)
 			{
