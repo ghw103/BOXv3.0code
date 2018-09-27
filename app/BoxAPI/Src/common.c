@@ -1,23 +1,25 @@
 
 #include "common.h"
-#include "cmsis_os.h"
+//#include "cmsis_os.h"
 #include "usart.h"
-#include "gpio.h"
-#include "iwdg.h"
+//#include "gpio.h"
+//#include "iwdg.h"
 #include "DAC.h"
 #include "R8025t.h"
-#include "Relay.h"
+//#include "Relay.h"
 #include "ADS1230.h"
-#include "recod.h"
+//#include "recod.h"
 #include <string.h>
-#include "eeprom.h"
+//#include "eeprom.h"
 #include "cat1023.h"
-#include "usart.h"
-#include "fatfs.h"
+//#include "usart.h"
+//#include "fatfs.h"
 #include "app_ethernet.h"
 
+#include "lwip/sockets.h"
+#include "lwip/netdb.h"
 __IO uint32_t user_sTick;
-//
+RS485_MSG_T rs485_MSG;
 //const char ConfigFile[] = "Config.json";
 
 void EEinit(void)
@@ -95,11 +97,11 @@ void User_UART_IRQHandler(UART_HandleTypeDef *huart)
 	uint8_t clean;
 	if ((__HAL_UART_GET_FLAG(huart, UART_FLAG_RXNE) != RESET))
 	{
-		if (rx_msg->lengh == 0)
-		{
-			rx_msg->lengh += 7;
-			//	rx_msg->Data += *buff;
-		}
+//		if (rx_msg->lengh == 0)
+//		{
+//			rx_msg->lengh += 7;
+//			//	rx_msg->Data += *buff;
+//		}
 		/* 关中断*/
 		//	taskDISABLE_INTERRUPTS();
 		//  __HAL_UART_ENABLE_IT(huart,UART_IT_IDLE);   //??????
@@ -123,7 +125,7 @@ void User_UART_IRQHandler(UART_HandleTypeDef *huart)
 		//			HAL_GPIO_WritePin(_485DIR_GPIO_Port, _485DIR_Pin, GPIO_PIN_RESET);
 
 		/* 向消息队列发数据 */
-		xQueueSendFromISR(recvQueueHandle, (void *)&rx_msg, &xHigherPriorityTaskWoken);
+		xQueueSendFromISR(Rs485QueueHandle, (void *)&rx_msg, &xHigherPriorityTaskWoken);
 		/* 如果 xHigherPriorityTaskWoken = pdTRUE ，那么退出中断后切到当前最高优先级任务执行 */
 		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
@@ -133,6 +135,61 @@ void User_UART_IRQHandler(UART_HandleTypeDef *huart)
 		//	taskENABLE_INTERRUPTS();
 	}
 }
+
+//int sockConnect(int * sock, char *addr, char *port)
+//{
+//	struct sockaddr_in address;
+//	socklen_t len;
+//	int rc = -1;
+//	int socket;
+//	sa_family_t family = AF_INET;
+//	struct addrinfo *result = NULL;
+//	struct addrinfo hints = { 0, AF_UNSPEC, SOCK_STREAM, IPPROTO_TCP, 0, NULL, NULL, NULL };
+//	//	static struct timeval tv;
+//
+//	if((rc = getaddrinfo(addr, port, &hints, &result)) == 0)
+//	{
+//		struct addrinfo *res = result;
+//		while (res)
+//		{
+//			if (res->ai_family == AF_INET)
+//			{
+//				result = res;
+//				break;
+//			}
+//			res = res->ai_next;
+//		}
+//		if (result->ai_family == AF_INET)
+//		{
+//			address.sin_port = ((struct sockaddr_in *)(result->ai_addr))->sin_port;  // htons(port);
+//			address.sin_family = AF_INET;
+//			address.sin_addr = ((struct sockaddr_in *)(result->ai_addr))->sin_addr;
+//		}
+//		else
+//			rc = -1;
+//		freeaddrinfo(result);
+//	}
+//	if (rc == 0)
+//	{
+//		socket = socket(AF_INET, SOCK_STREAM, 0);
+//		if (socket != -1)
+//		{
+//			//			eer = setsockopt(n->my_socket闂傚倷鐒︾?笛呯矙閹达富鏁嗛柣婊?绔瀇S0CKET, SO_RCVTIMEO闂??????(char *)&nNetTimeout, sizeof(nNetTimeout));
+//			//			printf("ferr:%d", eer);
+//			if(family == AF_INET)
+//				rc = connect(socket, (struct sockaddr *)&address, sizeof(address));
+//		}
+//	}
+//		if (rc == 0)
+//		{
+//			rc = getsockname(socket, (struct sockaddr *)&address, &len);
+//			*sock = socket;
+//		//	if (error  >= 0) printf("Server %s connected, local port %d\n", srv, ntohs(servaddr.sin_port));
+//			//return n->my_socket;
+//		}
+//
+//	return rc;
+//}
 
 void user_Tick(void)
 {

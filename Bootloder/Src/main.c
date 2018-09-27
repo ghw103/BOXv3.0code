@@ -120,7 +120,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+ 
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -145,7 +145,7 @@ int main(void)
 //	}
 	
 	/* Initialize Flash */
-	
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -168,7 +168,7 @@ int main(void)
 				  BSP_LED_Toggle(LED_RED);
 				  main_iap(); 
 			  }
-		
+	
 		  }
 	}
 	  else

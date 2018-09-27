@@ -11,7 +11,7 @@ extern "C"
 
 	//typedef struct Network Network;
 
-	extern osMessageQId recvQueueHandle;
+	extern osMessageQId Rs485QueueHandle;
 	extern osSemaphoreId TIMEBinarySemHandle;
 	//extern osMessageQId MBQueueHandle;
 	extern __IO uint32_t usTick;
@@ -31,7 +31,7 @@ extern "C"
 		uint8_t Data[UAST_BUFFER_SIZE];
 	} RS485_MSG_T; /* 定义一个结构体用于消息队列 */
 
-	extern RS485_MSG_T rs485_MSG;
+extern RS485_MSG_T rs485_MSG;
 
 #define PORT 8088
 

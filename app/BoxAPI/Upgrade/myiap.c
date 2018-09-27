@@ -79,8 +79,8 @@ const char UploadFile[] = "F0upload.bin";
 /*****************************************************************************************/
 void fatfstest(void)
 {
-	UINT fnum; /* 文件成功读写数量 */
-	BYTE ReadBuffer[1024] = { 0 }; /* 读缓冲区 */
+	UINT fnum;													   /* 文件成功读写数量 */
+	BYTE ReadBuffer[1024] = {0};								   /* 读缓冲区 */
 	BYTE WriteBuffer[] = "今天是个好日子，新建文件系统测试文件\n"; /* 写缓冲区*/
 
 	uint8_t workBuffer[_MAX_SS];
@@ -254,25 +254,24 @@ void RunApplication(void)
 }
 int socketConnect(int *n, char *addr, int port)
 {
-	int sockfd, error = -1;
+	int socket, error = -1;
 	struct sockaddr_in servaddr;
 	socklen_t len;
 	struct hostent *host;
 
 	char str[INET_ADDRSTRLEN];
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < 0)
-		return sockfd;
+	socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (socket < 0)
+		return socket;
 
 	host = gethostbyname(addr);
 	if (NULL == host || host->h_addrtype != AF_INET)
 	{
-		close(sockfd);
+		close(socket);
 		return -2;
 	}
-	printf("\address: %s\n",
-	inet_ntop(host->h_addrtype, host->h_addr, str, sizeof(str)));
+	printf("\address: %s\n", inet_ntop(host->h_addrtype, host->h_addr, str, sizeof(str)));
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(port);
@@ -280,18 +279,18 @@ int socketConnect(int *n, char *addr, int port)
 	//inet_aton(srv, &(servaddr.sin_addr));
 	//inet_pton(AF_INET, srv, &servaddr.sin_addr);
 	// TODO: Use SetSockOpt to
-	error = connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
+	error = connect(socket, (struct sockaddr *)&servaddr, sizeof(servaddr));
 	if (error == 0)
 	{
-		error = getsockname(sockfd, (struct sockaddr *)&servaddr, &len);
+		error = getsockname(socket, (struct sockaddr *)&servaddr, &len);
 		//if (error  >= 0) printf("Server %s connected, local port %d\n", srv, ntohs(servaddr.sin_port));
-		*n = sockfd;
-		return sockfd;
+		*n = socket;
+		return socket;
 	}
 	else
 	{
 		//printf("Error connecting %d\n", error);
-		close(sockfd);
+		close(socket);
 		return error;
 	}
 }
@@ -344,15 +343,12 @@ int8_t IAP_upgread(int socket)
 			{
 				return recv_datalen;
 			}
-			stm32_version = *(uint32_t *)(recv_data);
+			///*/*/*/*/*	stm32_version = *(uint32_t *)(recv_data);*/*/*/*/*/
+			stm32_version = recv_data[0] << 24 | recv_data[1] << 16 | recv_data[2] << 8 | recv_data[3];
 			printf("stm32_version:%d\n", stm32_version);
-			binFileLen = *(uint32_t *)(recv_data + 10);
+			binFileLen = recv_data[10] << 24 | recv_data[11] << 16 | recv_data[12] << 8 | recv_data[13];
 			printf("binlen:%d\n", binFileLen);
 			recv_datalen = 0;
-			send(socket, sendDatPackAck, 6, 0);
-			//		retUSER = f_open(&USERFile, "1.txt", FA_CREATE_ALWAYS | FA_WRITE);
-			//				retUSER = f_mkfs((TCHAR const*)USERPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
-			//			printf("retUSER %s\r\n", FR_Table[retUSER]);
 			dog();
 			taskENTER_CRITICAL();
 			retUSER = f_open(&USERFile, DownloadFile, FA_CREATE_ALWAYS | FA_WRITE);
@@ -370,18 +366,16 @@ int8_t IAP_upgread(int socket)
 			revPackNum = 0;
 			break;
 		case senddatPak: //发送文件
-			printf("revPackNum:%d \n", revPackNum);
+						 //		printf("revPackNum:%d \n", revPackNum);
 
 			sendfilenum[0] = (revPackNum >> 24) & 0x000000ff;
 			sendfilenum[1] = (revPackNum >> 16) & 0x000000ff;
 			sendfilenum[2] = (revPackNum >> 8) & 0x000000ff;
 			sendfilenum[3] = (revPackNum)&0x000000ff;
 			send(socket, sendfilenum, 4, 0);
-			//			send(socket, "1", 1, 0);
-			//			recv_datalen = 0;
 			dog();
 			revPacklenth = binFileLen - binDataLen;
-			printf("recvlenth:%d", revPacklenth);
+			//		printf("recvlenth:%d\r\n", revPacklenth);
 			if (revPacklenth > 1024)
 			{
 				revPacklenth = 1034;
@@ -391,8 +385,9 @@ int8_t IAP_upgread(int socket)
 				revPacklenth += 10;
 			}
 			memset(recv_data, 0, recv_data_size);
+
 			recv_datalen = UP_read(socket, recv_data, revPacklenth, 2000);
-			printf("recv_len:%d\n", recv_datalen);
+			//		printf("recv_len:%d\n", recv_datalen);
 			if (recv_datalen <= 0)
 			{
 				f_close(&USERFile);
@@ -400,18 +395,15 @@ int8_t IAP_upgread(int socket)
 				return recv_datalen;
 			}
 			//校验数据包头
-
-			printf("recvpack:%d\n", *(uint32_t *)(recv_data));
+			//		printf("recvpack:%d\n", *(uint32_t *)(recv_data));
 			if (recv_datalen) //接收到数据
 			{
-				//				if (recv_datalen == 1034)
-				//				{
-				if (*(uint32_t *)(recv_data) == revPackNum)
+				if ((recv_data[0] << 24 | recv_data[1] << 16 | recv_data[2] << 8 | recv_data[3]) == revPackNum)
 				{
-					revPacklenth = *(uint32_t *)(recv_data + 4);
+					revPacklenth = recv_data[4] << 24 | recv_data[5] << 16 | recv_data[6] << 8 | recv_data[7];
 					if (recv_datalen == (revPacklenth + 10))
 					{
-						binDataLen += *(uint32_t *)(recv_data + 4);
+						binDataLen += recv_data[4] << 24 | recv_data[5] << 16 | recv_data[6] << 8 | recv_data[7];
 						dog();
 						taskENTER_CRITICAL(); //or portENTER_CRITICAL();
 						retUSER = f_write(&USERFile, recv_data + 10, recv_datalen - 10, &fnum);
@@ -451,7 +443,7 @@ int8_t IAP_upgread(int socket)
 			}
 			break;
 		case sendAllOk:
-			send(socket, revallfile, 6, 0);
+
 			dog();
 			if (f_stat(DownloadFile, &finfno) != FR_OK)
 			{
@@ -466,7 +458,8 @@ int8_t IAP_upgread(int socket)
 			}
 			printf("feilsize:%d\n", finfno.fsize);
 			IAP_sta = 6;
-			printf("数据接收完毕开始升级\n");
+			printf("接收完毕\n");
+			send(socket, revallfile, 6, 0);
 			__set_FAULTMASK(1);
 			HAL_NVIC_SystemReset();
 			//	f_unlink(DownloadFile);
@@ -511,4 +504,3 @@ int UP_read(int my_socket, unsigned char *buffer, int len, int timeout_ms)
 	} while (recvLen < len && xTaskCheckForTimeOut(&xTimeOut, &xTicksToWait) == pdFALSE);
 	return recvLen;
 }
-

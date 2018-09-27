@@ -63,7 +63,7 @@ typedef struct
   char *packaged_date;
 } firmware_version_t;
 
-#define FW_VERSION 300
+#define FW_VERSION 401
 #define HW_VERSION 300
 #define BOOT_VERSION 100
 #define SN 0

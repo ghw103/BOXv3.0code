@@ -62,8 +62,8 @@ extern "C"
 
 #define FLASH_ID 0xEF4015
 
-#define FLASH_L HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_RESET); //W25QXX的片选信�?
-#define FLASH_H HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_SET);   //W25QXX的片选信�?
+#define FLASH_L HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_RESET); //W25QXX的片选信
+#define FLASH_H HAL_GPIO_WritePin(FLASH_CS_GPIO_Port, FLASH_CS_Pin, GPIO_PIN_SET);   //W25QXX的片选信
 
   /* USER CODE BEGIN Includes */
 

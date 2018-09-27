@@ -150,7 +150,7 @@
 	 #define IP_SOF_BROADCAST_RECV           0
 	 /*---------------------------------连接数量--------------------------------------------*/	 
 	 #define MEMP_NUM_NETBUF                 12
-	 #define MEMP_NUM_NETCONN                6
+	 #define MEMP_NUM_NETCONN                8
 	 /*---------------------------------debug--------------------------------------------*/		 
 	 //#define LWIP_DEBUG
 	 //#define TCP_DEBUG LWIP_DBG_ON 

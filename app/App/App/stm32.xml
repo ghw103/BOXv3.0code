@@ -48,7 +48,7 @@
     <AllDependencies>
       <ProjectDependency>
         <RelativePath>..\..\App.gpdsc</RelativePath>
-        <Timestamp>131819872119218523</Timestamp>
+        <Timestamp>131824280503173991</Timestamp>
       </ProjectDependency>
     </AllDependencies>
     <RootDirectory>
@@ -1145,26 +1145,26 @@
       <ImportedConfiguration>
         <Settings>
           <IncludeDirectories>
-            <string>D:\BOXv3.0code\app\Inc</string>
-            <string>D:\BOXv3.0code\app\Drivers\CMSIS\Include</string>
-            <string>D:\BOXv3.0code\app\Drivers\CMSIS\Device\ST\STM32F4xx\Include</string>
-            <string>D:\BOXv3.0code\app\Drivers\STM32F4xx_HAL_Driver\Inc</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\FreeRTOS\Source\include</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM4F</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\lwip</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\lwip\apps</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\lwip\priv</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\lwip\prot</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\netif</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\netif\ppp</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\posix</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\posix\sys</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\system</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\LwIP\system\arch</string>
-            <string>D:\BOXv3.0code\app\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy</string>
-            <string>D:\BOXv3.0code\app\Middlewares\Third_Party\FatFs\src</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Inc</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Drivers\CMSIS\Include</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Drivers\CMSIS\Device\ST\STM32F4xx\Include</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Drivers\STM32F4xx_HAL_Driver\Inc</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\FreeRTOS\Source\include</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM4F</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\lwip</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\lwip\apps</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\lwip\priv</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\lwip\prot</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\netif</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\netif\ppp</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\posix</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\src\include\posix\sys</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\system</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\LwIP\system\arch</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy</string>
+            <string>D:\WorkPrj\BOXv3.0code\app\Middlewares\Third_Party\FatFs\src</string>
           </IncludeDirectories>
           <PreprocessorMacros>
             <string>$$com.sysprogs.bspoptions.primary_memory$$_layout</string>
